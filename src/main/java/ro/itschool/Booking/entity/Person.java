@@ -3,8 +3,11 @@ package ro.itschool.Booking.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
 
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -13,7 +16,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person {
+public class Person implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +34,9 @@ public class Person {
     private String checkIn;
 
     private String checkOut;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
     @Column(unique = true)
@@ -62,4 +68,38 @@ public class Person {
         this.property = property;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return getEmail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
