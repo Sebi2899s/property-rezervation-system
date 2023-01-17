@@ -3,6 +3,8 @@ package ro.itschool.Booking.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
 import ro.itschool.Booking.entity.Person;
@@ -17,7 +19,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping(value = "/bk/person")
 public class PersonController {
-    private static final  Logger LOGGER = LoggerFactory.getLogger(PersonController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonController.class);
     //dependency injection with constructor
     private final PersonService personService;
 
@@ -54,25 +56,41 @@ public class PersonController {
         return personService.savePerson(person);
     }
 
+    //make a rezervation with idperson and idproperty using update
     @PutMapping(value = "/{idPerson}/property-reservations/{idProperty}")
-    public Person reservation(@PathVariable Long idPerson, @PathVariable Long idProperty) {
+    public Person reservation(@PathVariable Long idPerson, @PathVariable Long idProperty, @RequestBody Person personCheck) {
         LOGGER.info("Updating a person to the property");
         Person person = personRepository.findById(idPerson).orElseThrow(() -> new IllegalStateException("This id" + idPerson + "was not found!"));
         Property property = propertyRepository.findById(idProperty).orElseThrow(() -> new IllegalStateException("This id" + idProperty + "was not found!"));
         person.assignProperty(property);
+        person.setCheckIn(personCheck.getCheckIn());//add check-in
+        person.setCheckOut(personCheck.getCheckOut());//add check-out
         return personRepository.save(person);
     }
 
     @PutMapping(value = "/update-person/{id}")
-    public void personUpdate(@PathVariable Long id, @RequestBody Person person) {
+    public ResponseEntity personUpdate(@PathVariable Long id, @RequestBody Person person) {
         LOGGER.info("Updating a person using the id value");
-        personService.updatePerson(id, person);
+        Optional<Person> checkId = personService.findById(id);
+        if (checkId.isPresent()) {
+            personService.updatePerson(id, person);
+            return ResponseEntity.ok().body("The person with id " + id + " was updated");
+        } else {
+            return ResponseEntity.badRequest().body("This id was not found!");
+        }
     }
 
     @DeleteMapping(value = "/delete/{id}")
-    public void deletePerson(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity deletePerson(@PathVariable Long id) {
         LOGGER.info("Deleting a person using the id value");
-        personService.deletePerson(id);
-    }
+        Optional<Person> checkId = personService.findById(id);
+        if (checkId.isEmpty()) {
+            return ResponseEntity.badRequest().body("This id " + id + " was not found!");
+        } else {
+            personService.deletePerson(id);
+            return ResponseEntity.ok().body("This person was deleted");
+        }
 
+    }
 }

@@ -19,23 +19,18 @@ public class PersonDTO {
     private String lastName;
 
     private String email;
-    private String checkIn;
-
-    private String checkOut;
 
 
     private String mobileNumber;
 
-    public PersonDTO(Long personId, String firstName, String lastName, String email, String checkIn, String checkOut) {
+    public PersonDTO(Long personId, String firstName, String lastName, String email) {
         this.personId = personId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.checkIn = checkIn;
-        this.checkOut = checkOut;
     }
 
     public Person toEntity() {
-        return new Person(personId, firstName, lastName, email, checkIn, checkOut, mobileNumber);
+        return new Person(personId, firstName, lastName, email, mobileNumber);
     }
 }

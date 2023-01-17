@@ -9,6 +9,7 @@ import java.util.List;
 @Service
 public class PropertyConvertor {
 
+
     public PropertyDTO entityToDto(Property property) {
         //convert entity into DTO
         PropertyDTO propertyDTO = new PropertyDTO();

@@ -33,11 +33,13 @@ public class PropertyService {
     //POST
     public Property createProperty(Property property) {
         propertyEmailExistsCheck(property);
+
         return propertyRepository.save(property);
     }
 
 
-    //method that check if name exists
+
+    //method that check if email exists
     private void propertyEmailExistsCheck(Property property) {
         Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
         if (propertyOptional.isPresent()) {
@@ -49,6 +51,7 @@ public class PropertyService {
     public void updateProperty(Long id, Property property) {
         Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IllegalStateException("This id" + property.getId() + "is not found! "));
         propertyEmailExistsCheck(property);
+
         propertyUpdate.setId(property.getId());
         propertyUpdate.setPropertyName(property.getPropertyName());
         propertyUpdate.setPropertyEmail(property.getPropertyEmail());
@@ -65,5 +68,13 @@ public class PropertyService {
         else {
             propertyRepository.deleteById(id);
         }
+    }
+
+    public Optional<Property> findByPropertyEmail(String propertyEmail) {
+        return propertyRepository.findByPropertyEmail(propertyEmail);
+    }
+
+    public Optional<Property> findById(Long id) {
+        return propertyRepository.findById(id);
     }
 }

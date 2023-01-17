@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -48,19 +50,17 @@ public class Person implements UserDetails {
     private Property property;
 
 
-    public Person(Long personId, String firstName, String lastName, String email, String checkIn, String checkOut, String mobileNumber) {
+    public Person(Long personId, String firstName, String lastName, String email, String mobileNumber) {
         this.personId = personId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = Objects.requireNonNull(email);
-        this.checkIn = checkIn;
-        this.checkOut = checkOut;
         this.mobileNumber = Objects.requireNonNull(mobileNumber);
     }
 
 
     public PersonDTO toDTO() {
-        return new PersonDTO(personId, firstName, lastName, email, checkIn, checkOut);
+        return new PersonDTO(personId, firstName, lastName, email);
     }
 
 
@@ -70,7 +70,7 @@ public class Person implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 
@@ -14,7 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PropertyDTO {
-
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
     private Long id;
 
     private String propertyType;
@@ -29,7 +32,7 @@ public class PropertyDTO {
 
     private String propertyAddress;
 
-    public PropertyDTO(Long id, String propertyType, String propertyName, String propertyLocation, String propertyAddress,String propertyEmail) {
+    public PropertyDTO(Long id, String propertyType, String propertyName, String propertyLocation, String propertyAddress, String propertyEmail) {
         this.id = id;
         this.propertyType = propertyType;
         this.propertyName = propertyName;
@@ -38,8 +41,4 @@ public class PropertyDTO {
         this.propertyEmail = propertyEmail;
     }
 
-
-    public Property toEntity() {
-        return new Property(id, propertyType, propertyName, propertyPassword, propertyLocation, propertyAddress,propertyEmail);
-    }
 }

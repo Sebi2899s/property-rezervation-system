@@ -17,8 +17,6 @@ public class PersonConvertor {
         personDTO.setFirstName(person.getFirstName());
         personDTO.setLastName(person.getLastName());
         personDTO.setEmail(person.getEmail());
-        personDTO.setCheckIn(person.getCheckIn());
-        personDTO.setCheckOut(person.getCheckOut());
         personDTO.setMobileNumber(person.getMobileNumber());
 
         return personDTO;
@@ -37,8 +35,6 @@ public class PersonConvertor {
         person.setFirstName(personDTO.getFirstName());
         person.setLastName(personDTO.getLastName());
         person.setEmail(personDTO.getEmail());
-        person.setCheckIn(personDTO.getCheckIn());
-        person.setCheckOut(personDTO.getCheckOut());
         person.setMobileNumber(personDTO.getMobileNumber());
         return person;
     }

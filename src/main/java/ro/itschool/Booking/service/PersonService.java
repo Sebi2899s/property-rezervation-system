@@ -1,5 +1,7 @@
 package ro.itschool.Booking.service;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.repository.PersonRepository;
@@ -30,15 +32,11 @@ public class PersonService {
         }
     }
 
-    //POST
-    public void createPerson(Person person) {
-        checkMobileNumber(person);
-        personRepository.save(person);
 
-    }
-
+    //Post
     public Person savePerson(Person person) {
         checkMobileNumber(person);
+        checkEmail(person);
         return personRepository.save(person);
 
     }
@@ -51,18 +49,26 @@ public class PersonService {
         }
     }
 
+    private void checkEmail(Person person) {
+        Optional<Person> checkEmail = personRepository.findByEmail(person.getEmail());
+        if (checkEmail.isPresent()) {
+            if (!person.getEmail().contains("@")) {
+                throw new IllegalStateException("Invalid email, must contain @ symbol");
+            }
+        }
+    }
+
     //UPDATE
     public void updatePerson(Long id, Person person) {
         Person updatePerson = personRepository.findById(id).orElseThrow(
                 () -> new IllegalStateException(String.format("This id %s is not found", person.getPersonId())));
-        checkMobileNumber(person);
 
         updatePerson.setLastName(person.getLastName());
         updatePerson.setFirstName(person.getFirstName());
         updatePerson.setMobileNumber(person.getMobileNumber());
         updatePerson.setEmail(person.getEmail());
-        updatePerson.setCheckIn(person.getCheckIn());
-        updatePerson.setCheckOut(person.getCheckOut());
+        checkEmail(person);
+        checkMobileNumber(person);
     }
 
     //DELETE
@@ -72,5 +78,13 @@ public class PersonService {
                     + " is not found");
         } else
             personRepository.deleteById(id);
+    }
+
+    public Optional<Person> findByEmail(String email) {
+        return personRepository.findByEmail(email);
+    }
+
+    public Optional<Person> findById(Long id) {
+        return personRepository.findById(id);
     }
 }
