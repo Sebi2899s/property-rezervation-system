@@ -23,7 +23,6 @@ public class Property {
 
     private String propertyName;
 
-    private String propertyPassword;
 
     private String propertyEmail;
 
@@ -32,18 +31,17 @@ public class Property {
     private String propertyAddress;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "property", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "property")
     @ToString.Exclude
     private List<Person> personList;
 
-    public Property(Long id, String propertyType, String propertyName, String propertyEmail, String propertyPassword, String propertyLocation, String propertyAddress) {
+    public Property(Long id, String propertyType, String propertyName, String propertyEmail,  String propertyLocation, String propertyAddress) {
         this.id = id;
         this.propertyType = propertyType;
         this.propertyName = propertyName;
         this.propertyEmail = propertyEmail;
         this.propertyLocation = propertyLocation;
         this.propertyAddress = propertyAddress;
-        this.propertyPassword = propertyPassword;
     }
 
 
@@ -57,7 +55,6 @@ public class Property {
                 "id=" + id +
                 ", propertyType='" + propertyType + '\'' +
                 ", propertyName='" + propertyName + '\'' +
-                ", propertyPassword='" + propertyPassword + '\'' +
                 ", propertyEmail='" + propertyEmail + '\'' +
                 ", propertyLocation='" + propertyLocation + '\'' +
                 ", propertyAddress='" + propertyAddress + '\'' +
