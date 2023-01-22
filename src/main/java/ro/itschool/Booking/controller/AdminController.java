@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Role;
+import ro.itschool.Booking.exception.IncorrectIdException;
+import ro.itschool.Booking.exception.IncorretNameException;
+import ro.itschool.Booking.exception.MobileNumberException;
 import ro.itschool.Booking.service.PersonService;
 import ro.itschool.Booking.service.PropertyService;
 
@@ -38,7 +41,7 @@ public class AdminController {
 
     @PostMapping(value = "/add-user")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity addUser(@RequestBody Person person) {
+    public ResponseEntity addUser(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
         Optional<Person> checkEmail = personService.findByEmail(person.getEmail());
         if (checkEmail.isEmpty()) {
             personService.savePerson(person);
@@ -67,7 +70,11 @@ public class AdminController {
         if (optionalPerson.isPresent()) {
             optionalPerson.ifPresent(user -> {
                 user.setRole(roles);
-                personService.savePerson(user);
+                try {
+                    personService.savePerson(user);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
             return ResponseEntity.ok().build();
         } else
@@ -76,7 +83,7 @@ public class AdminController {
 
     @DeleteMapping(value = "/remove-person/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity removePerson(@PathVariable Long id) {
+    public ResponseEntity removePerson(@PathVariable Long id) throws IncorrectIdException {
         Optional<Person> findById = personService.findById(id);
         if (findById.isPresent()) {
             personService.deletePerson(id);
@@ -88,7 +95,7 @@ public class AdminController {
 
     @DeleteMapping(value = "/remove-property/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity removeProperty(@PathVariable Long id) {
+    public ResponseEntity removeProperty(@PathVariable Long id) throws IncorrectIdException {
         Optional<Property> findById = propertyService.findById(id);
         if (findById.isPresent()) {
             personService.deletePerson(id);

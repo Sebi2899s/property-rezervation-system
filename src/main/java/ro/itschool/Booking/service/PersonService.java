@@ -1,9 +1,10 @@
 package ro.itschool.Booking.service;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.entity.Person;
+import ro.itschool.Booking.exception.IncorrectIdException;
+import ro.itschool.Booking.exception.IncorretNameException;
+import ro.itschool.Booking.exception.MobileNumberException;
 import ro.itschool.Booking.repository.PersonRepository;
 
 import java.util.List;
@@ -23,10 +24,10 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    public Optional<Person> getById(Long id) {
+    public Optional<Person> getById(Long id) throws IncorrectIdException {
         Optional<Person> findById = personRepository.findById(id);
         if (findById.isEmpty()) {
-            throw new IllegalStateException("This id " + id + " was not found!");
+            throw new IncorrectIdException("This id " + id + " was not found!");
         } else {
             return personRepository.findById(id);
         }
@@ -34,7 +35,9 @@ public class PersonService {
 
 
     //Post
-    public Person savePerson(Person person) {
+    public Person savePerson(Person person) throws MobileNumberException, IncorretNameException {
+
+
         checkMobileNumber(person);
         checkEmail(person);
         return personRepository.save(person);
@@ -42,26 +45,26 @@ public class PersonService {
     }
 
     //method to check if mobile number exists
-    private void checkMobileNumber(Person person) {
+    private void checkMobileNumber(Person person) throws MobileNumberException {
         Optional<Object> savePerson = personRepository.getPersonByMobileNumber(person.getMobileNumber());
         if (savePerson.isPresent()) {
-            throw new IllegalStateException(String.format("This mobile number %s is already used", person.getMobileNumber()));
+            throw new MobileNumberException(String.format("This mobile number %s is already used", person.getMobileNumber()));
         }
     }
 
-    private void checkEmail(Person person) {
+    private void checkEmail(Person person) throws IncorretNameException {
         Optional<Person> checkEmail = personRepository.findByEmail(person.getEmail());
         if (checkEmail.isPresent()) {
             if (!person.getEmail().contains("@")) {
-                throw new IllegalStateException("Invalid email, must contain @ symbol");
+                throw new IncorretNameException("Invalid email, must contain @ symbol");
             }
         }
     }
 
     //UPDATE
-    public void updatePerson(Long id, Person person) {
+    public void updatePerson(Long id, Person person) throws IncorretNameException, MobileNumberException, IncorrectIdException {
         Person updatePerson = personRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException(String.format("This id %s is not found", person.getPersonId())));
+                () -> new IncorrectIdException(String.format("This id %s is not found", person.getPersonId())));
 
         updatePerson.setLastName(person.getLastName());
         updatePerson.setFirstName(person.getFirstName());
@@ -72,9 +75,9 @@ public class PersonService {
     }
 
     //DELETE
-    public void deletePerson(Long id) {
+    public void deletePerson(Long id) throws IncorrectIdException {
         if (id == null) {
-            throw new IllegalStateException("This id " + id
+            throw new IncorrectIdException("This id " + id
                     + " is not found");
         } else
             personRepository.deleteById(id);

@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
+import ro.itschool.Booking.exception.IncorrectIdException;
+import ro.itschool.Booking.exception.IncorretNameException;
+import ro.itschool.Booking.exception.MobileNumberException;
 import ro.itschool.Booking.repository.PersonRepository;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PersonService;
@@ -51,7 +54,7 @@ public class PersonController {
 
 
     @PostMapping(value = "/save-person")
-    public Person personSave(@RequestBody Person person) {
+    public Person personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
         LOGGER.info("Saving a person");
         return personService.savePerson(person);
     }
@@ -69,7 +72,7 @@ public class PersonController {
     }
 
     @PutMapping(value = "/update-person/{id}")
-    public ResponseEntity personUpdate(@PathVariable Long id, @RequestBody Person person) {
+    public ResponseEntity personUpdate(@PathVariable Long id, @RequestBody Person person) throws MobileNumberException, IncorretNameException, IncorrectIdException {
         LOGGER.info("Updating a person using the id value");
         Optional<Person> checkId = personService.findById(id);
         if (checkId.isPresent()) {
@@ -82,7 +85,7 @@ public class PersonController {
 
     @DeleteMapping(value = "/delete/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity deletePerson(@PathVariable Long id) {
+    public ResponseEntity deletePerson(@PathVariable Long id) throws IncorrectIdException {
         LOGGER.info("Deleting a person using the id value");
         Optional<Person> checkId = personService.findById(id);
         if (checkId.isEmpty()) {

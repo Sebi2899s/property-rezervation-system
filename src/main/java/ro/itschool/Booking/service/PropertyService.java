@@ -2,6 +2,8 @@ package ro.itschool.Booking.service;
 
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.entity.Property;
+import ro.itschool.Booking.exception.IncorrectIdException;
+import ro.itschool.Booking.exception.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 
 import java.util.List;
@@ -23,9 +25,9 @@ public class PropertyService {
     }
 
     //GET by property name
-    public List<Property> getByPropertyName(String propertyName) {
+    public List<Property> getByPropertyName(String propertyName) throws IncorretNameException {
         if (propertyName == null) {
-            throw new IllegalStateException("There's no property with this name " + propertyName);
+            throw new IncorretNameException("There's no property with this name " + propertyName);
         } else
             return propertyRepository.findByPropertyName(propertyName);
     }
@@ -48,8 +50,8 @@ public class PropertyService {
     }
 
     //UPDATE
-    public void updateProperty(Long id, Property property) {
-        Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IllegalStateException("This id" + property.getId() + "is not found! "));
+    public void updateProperty(Long id, Property property) throws IncorrectIdException {
+        Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + property.getId() + "is not found! "));
         propertyEmailExistsCheck(property);
 
         propertyUpdate.setId(property.getId());
@@ -61,10 +63,10 @@ public class PropertyService {
     }
 
     //DELETE
-    public void deleteProperty(Long id) {
+    public void deleteProperty(Long id) throws IncorrectIdException {
         Optional<Property> checkId = propertyRepository.findById(id);
         if (checkId.isEmpty())
-            throw new IllegalStateException("This id" + id + "is not found!");
+            throw new IncorrectIdException("This id" + id + "is not found!");
         else {
             propertyRepository.deleteById(id);
         }
