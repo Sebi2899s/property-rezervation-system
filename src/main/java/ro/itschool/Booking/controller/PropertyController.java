@@ -43,6 +43,17 @@ public class PropertyController {
         return propertyService.getByPropertyName(name).stream().map(Property::toDTO).toList();
     }
 
+    @GetMapping(value = "/filter-type")
+    public List<PropertyDTO> propertyByPropertyType(@RequestParam String propertyType) {
+        List<Property> propertyByPropertyType = propertyService.getPropertyByPropertyType(propertyType);
+        return propertyByPropertyType.stream().map(Property::toDTO).toList();
+    }
+
+    @GetMapping(value = "/filter-first-name")
+    public List<PropertyDTO> propertyByCustomerFirstName(@RequestParam String firstName) {
+        List<Property> propertyByPersonFirstName = propertyService.getPropertyByPersonFirstName(firstName);
+        return propertyByPersonFirstName.stream().map(Property::toDTO).toList();
+    }
 
     @PostMapping(value = "/save-property")
     public Property saveProperty(@RequestBody Property property) {

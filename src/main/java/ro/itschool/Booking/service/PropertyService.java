@@ -1,10 +1,12 @@
 package ro.itschool.Booking.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.exception.IncorrectIdException;
 import ro.itschool.Booking.exception.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
+import ro.itschool.Booking.specifications.Specifications;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,13 +34,24 @@ public class PropertyService {
             return propertyRepository.findByPropertyName(propertyName);
     }
 
+    //get property by property type using query specification
+    public List<Property> getPropertyByPropertyType(String propertyTipe) {
+        Specification<Property> propertySpecification = Specifications.getPropertyByPropertyType(propertyTipe);
+        return propertyRepository.findAll(propertySpecification);
+    }
+
+    //get property where person have the following first name
+    public List<Property> getPropertyByPersonFirstName(String firstName) {
+        Specification<Property> specifications = Specifications.getPropertyByPersonFirstName(firstName);
+        return propertyRepository.findAll(specifications);
+    }
+
     //POST
     public Property createProperty(Property property) {
         propertyEmailExistsCheck(property);
 
         return propertyRepository.save(property);
     }
-
 
 
     //method that check if email exists

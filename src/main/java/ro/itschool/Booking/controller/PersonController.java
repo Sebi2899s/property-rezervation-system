@@ -58,7 +58,6 @@ public class PersonController {
         LOGGER.info("Saving a person");
         return personService.savePerson(person);
     }
-
     //make a rezervation with idperson and idproperty using update
     @PutMapping(value = "/{idPerson}/property-reservations/{idProperty}")
     public Person reservation(@PathVariable Long idPerson, @PathVariable Long idProperty, @RequestBody Person personCheck) {

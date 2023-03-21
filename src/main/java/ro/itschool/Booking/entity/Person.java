@@ -23,7 +23,6 @@ public class Person implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long personId;
-
     private String firstName;
 
     private String lastName;
