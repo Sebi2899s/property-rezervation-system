@@ -3,8 +3,11 @@ package ro.itschool.Booking.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.PropertyDTO;
+import ro.itschool.Booking.convertorDTO.PropertyConvertor;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.exception.IncorrectIdException;
 import ro.itschool.Booking.exception.IncorretNameException;
@@ -38,41 +41,45 @@ public class PropertyController {
 
 
     @GetMapping(value = "/rezervation-by-name")
-    public List<PropertyDTO> properties(@RequestParam String name) throws IncorretNameException {
+    public ResponseEntity<List<PropertyDTO>> properties(@RequestParam String name) throws IncorretNameException {
         LOGGER.info("Getting property by name");
-        return propertyService.getByPropertyName(name).stream().map(Property::toDTO).toList();
+        return new ResponseEntity<>(propertyService.getByPropertyName(name).stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/filter-type")
-    public List<PropertyDTO> propertyByPropertyType(@RequestParam String propertyType) {
+    public ResponseEntity<List<PropertyDTO>> propertyByPropertyType(@RequestParam String propertyType) {
         List<Property> propertyByPropertyType = propertyService.getPropertyByPropertyType(propertyType);
-        return propertyByPropertyType.stream().map(Property::toDTO).toList();
+        return new ResponseEntity<>(propertyByPropertyType.stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/filter-first-name")
-    public List<PropertyDTO> propertyByCustomerFirstName(@RequestParam String firstName) {
+    public ResponseEntity<List<PropertyDTO>> propertyByCustomerFirstName(@RequestParam String firstName) {
         List<Property> propertyByPersonFirstName = propertyService.getPropertyByPersonFirstName(firstName);
-        return propertyByPersonFirstName.stream().map(Property::toDTO).toList();
+        return new ResponseEntity<>(propertyByPersonFirstName.stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
 
     @PostMapping(value = "/save-property")
-    public Property saveProperty(@RequestBody Property property) {
+    public ResponseEntity<PropertyDTO> saveProperty(@RequestBody Property property) {
         LOGGER.info("Saving a property");
-        return propertyService.createProperty(property);
+        PropertyConvertor propertyConvertor = new PropertyConvertor();
+        propertyService.createProperty(property);
+        return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
     }
 
 
     @PutMapping(value = "/update-property/{id}")
-    public void updateProperty(@PathVariable Long id, @RequestBody Property property) throws IncorrectIdException {
+    public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @RequestBody Property property) throws IncorrectIdException {
         LOGGER.info("Updating a property using the id value");
         propertyService.updateProperty(id, property);
+        PropertyConvertor propertyConvertor = new PropertyConvertor();
+        return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/delete-property/{id}")
-    public void deleteProperty(@PathVariable Long id) throws IncorrectIdException {
+    public ResponseEntity<Long> deleteProperty(@PathVariable Long id) throws IncorrectIdException {
         LOGGER.info("Deleting a property using the id value");
-
         propertyService.deleteProperty(id);
+        return new ResponseEntity<>(id, HttpStatus.OK);
     }
 
 

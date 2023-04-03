@@ -3,7 +3,6 @@ package ro.itschool.Booking.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +15,7 @@ import ro.itschool.Booking.exception.MobileNumberException;
 import ro.itschool.Booking.service.PersonService;
 import ro.itschool.Booking.service.PropertyService;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -29,43 +29,80 @@ public class AdminController {
 
     @GetMapping(value = "/get-users")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity getAllUsers() {
+    public ResponseEntity<List<Person>> getAllUsers() {
         return new ResponseEntity<>(personService.getAllPersons(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-properties")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity getAllProperties() {
+    public ResponseEntity<List<Property>> getAllProperties() {
         return new ResponseEntity<>(propertyService.getAllProperties(), HttpStatus.OK);
     }
 
     @PostMapping(value = "/add-user")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity addUser(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
-        Optional<Person> checkEmail = personService.findByEmail(person.getEmail());
-        if (checkEmail.isEmpty()) {
-            personService.savePerson(person);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().body("This email is already used");
-        }
+    public ResponseEntity<Person> addUser(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
+        checkEmailPersonExists(person);
+        personService.savePerson(person);
+        return new ResponseEntity<>(person, HttpStatus.OK);
     }
+
 
     @PostMapping(value = "/add-property")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity addProperty(@RequestBody Property property) {
-        Optional<Property> checkEmail = propertyService.findByPropertyEmail(property.getPropertyEmail());
-        if (checkEmail.isEmpty()) {
-            propertyService.createProperty(property);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().body("This email is already used");
-        }
+    public ResponseEntity<Property> addProperty(@RequestBody Property property) throws IncorretNameException {
+        checkIfEmailPropertyExists(property);
+        propertyService.createProperty(property);
+        return new ResponseEntity<>(property, HttpStatus.OK);
     }
+
 
     @PutMapping(value = "/update-role/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity updateRole(@PathVariable Long id, @RequestBody Role roles) {
+    public ResponseEntity<Long> updateRole(@PathVariable Long id, @RequestBody Role roles) {
+        return checkIfIdExistsAndSetRole(id, roles);
+    }
+
+
+    @DeleteMapping(value = "/remove-person/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Long> removePerson(@PathVariable Long id) throws IncorrectIdException {
+        checkIfPersonIdExists(id);
+        personService.deletePerson(id);
+        return new ResponseEntity<>(id, HttpStatus.OK);
+    }
+
+
+    @DeleteMapping(value = "/remove-property/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Long> removeProperty(@PathVariable Long id) throws IncorrectIdException {
+        checkPropertyIdExists(id);
+        personService.deletePerson(id);
+        return new ResponseEntity<>(id, HttpStatus.OK);
+    }
+
+    private void checkPropertyIdExists(Long id) throws IncorrectIdException {
+        Optional<Property> findById = propertyService.findById(id);
+        if (findById.isEmpty()) {
+            throw new IncorrectIdException("This id doesn't exists!");
+        }
+    }
+
+    private void checkEmailPersonExists(Person person) throws IncorretNameException {
+        Optional<Person> checkEmail = personService.findByEmail(person.getEmail());
+        if (checkEmail.isPresent()) {
+            throw new IncorretNameException("This email already exists!");
+        }
+    }
+
+    private void checkIfEmailPropertyExists(Property property) throws IncorretNameException {
+        Optional<Property> checkEmail = propertyService.findByPropertyEmail(property.getPropertyEmail());
+        if (checkEmail.isPresent()) {
+            throw new IncorretNameException("This email was already taken!");
+        }
+    }
+
+    private ResponseEntity<Long> checkIfIdExistsAndSetRole(Long id, Role roles) {
         Optional<Person> optionalPerson = personService.findById(id);
         if (optionalPerson.isPresent()) {
             optionalPerson.ifPresent(user -> {
@@ -76,33 +113,15 @@ public class AdminController {
                     e.printStackTrace();
                 }
             });
-            return ResponseEntity.ok().build();
+            return new ResponseEntity<>(id, HttpStatus.OK);
         } else
-            return ResponseEntity.badRequest().build();
+            return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping(value = "/remove-person/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity removePerson(@PathVariable Long id) throws IncorrectIdException {
+    private void checkIfPersonIdExists(Long id) throws IncorrectIdException {
         Optional<Person> findById = personService.findById(id);
-        if (findById.isPresent()) {
-            personService.deletePerson(id);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().body("This id " + id + " was not found!");
+        if (findById.isEmpty()) {
+            throw new IncorrectIdException("This id doesn't exists!");
         }
-    }
-
-    @DeleteMapping(value = "/remove-property/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity removeProperty(@PathVariable Long id) throws IncorrectIdException {
-        Optional<Property> findById = propertyService.findById(id);
-        if (findById.isPresent()) {
-            personService.deletePerson(id);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().body("This id " + id + " was not found!");
-        }
-
     }
 }

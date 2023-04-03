@@ -35,12 +35,18 @@ public class PersonService {
 
     //Post
     public Person savePerson(Person person) throws MobileNumberException, IncorretNameException {
-
-
-        checkMobileNumber(person);
+        checkEmailExists(person);
         checkEmail(person);
+        checkMobileNumber(person);
         return personRepository.save(person);
 
+    }
+
+    private void checkEmailExists(Person person) throws IncorretNameException {
+        Optional<Person> checkEmailExists = personRepository.findByEmail(person.getEmail());
+        if (checkEmailExists.isPresent()) {
+            throw new IncorretNameException("This email is already taken!");
+        }
     }
 
     //method to check if mobile number exists
