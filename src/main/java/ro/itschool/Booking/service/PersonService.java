@@ -10,7 +10,6 @@ import ro.itschool.Booking.repository.PersonRepository;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
 @Service
 public class PersonService {
     private final PersonRepository personRepository;

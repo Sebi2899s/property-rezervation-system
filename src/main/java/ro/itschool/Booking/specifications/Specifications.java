@@ -6,6 +6,10 @@ import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 
 public class Specifications {
+    private Specifications() {
+
+    }
+
     public static Specification<Property> getPropertyByPersonFirstName(String firstName) {
         return (root, query, criteriaBuilder) -> {
             Join<Property, Person> propertyPersonJoin = root.join("firstName");
