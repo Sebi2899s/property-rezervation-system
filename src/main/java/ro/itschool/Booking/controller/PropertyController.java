@@ -3,6 +3,7 @@ package ro.itschool.Booking.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,11 +40,11 @@ public class PropertyController {
         return propertyService.getAllProperties().stream().map(Property::toDTO).toList();
     }
 
-
-    @GetMapping(value = "/rezervation-by-name")
+//get reservation by name
+    @GetMapping(value = "/get-reservation")
     public ResponseEntity<List<PropertyDTO>> properties(@RequestParam String name) throws IncorretNameException {
         LOGGER.info("Getting property by name");
-        return new ResponseEntity<>(propertyService.getByPropertyName(name).stream().map(Property::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(propertyService.getPropertiesByNameAndSortedAlphabetically(name).stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/filter-type")

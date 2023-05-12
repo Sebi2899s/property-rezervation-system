@@ -8,8 +8,7 @@ import ro.itschool.Booking.exception.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.specifications.Specifications;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 //@Service
 @Service
@@ -19,6 +18,13 @@ public class PropertyService {
 
     public PropertyService(PropertyRepository propertyRepository) {
         this.propertyRepository = propertyRepository;
+    }
+
+
+    public List<Property> getPropertiesByNameAndSortedAlphabetically(String name) {
+        List<Property> properties = propertyRepository.getPropertyNameAndFilter(name).orElseThrow(() -> new RuntimeException("There no properties with this name"));
+        properties.sort(Comparator.comparing(Property::getPropertyName));
+        return properties;
     }
 
     //GET
@@ -48,9 +54,13 @@ public class PropertyService {
 
     //POST
     public Property createProperty(Property property) {
-        propertyEmailExistsCheck(property);
-
-        return propertyRepository.save(property);
+        Property save = null;
+        if (property==null) {
+            propertyEmailExistsCheck(property);
+        }else {
+             save = propertyRepository.save(property);
+        }
+        return save;
     }
 
 
