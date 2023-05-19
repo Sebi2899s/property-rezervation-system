@@ -1,4 +1,4 @@
-package ro.itschool.Booking.exception;
+package ro.itschool.Booking.customException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,11 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), incorrectIdException.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
-
+    @ExceptionHandler(InvalidMailException.class)
+    public ResponseEntity<ErrorDetails> handleInvalidMailException(InvalidMailException invalidMailException, WebRequest request){
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), invalidMailException.getMessage(),request.getDescription(false));
+        return new ResponseEntity<>(errorDetails,HttpStatus.BAD_REQUEST);
+    }
     @ExceptionHandler(IncorretNameException.class)
     public ResponseEntity<ErrorDetails> handleIncorrectNameEx(IncorretNameException incorretNameException, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), incorretNameException.getMessage(), request.getDescription(false));

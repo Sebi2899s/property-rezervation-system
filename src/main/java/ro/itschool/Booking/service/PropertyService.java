@@ -3,8 +3,8 @@ package ro.itschool.Booking.service;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.entity.Property;
-import ro.itschool.Booking.exception.IncorrectIdException;
-import ro.itschool.Booking.exception.IncorretNameException;
+import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.specifications.Specifications;
 

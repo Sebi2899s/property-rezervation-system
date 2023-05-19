@@ -1,4 +1,4 @@
-package ro.itschool.Booking.exception;
+package ro.itschool.Booking.customException;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

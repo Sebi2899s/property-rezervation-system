@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Role;
-import ro.itschool.Booking.exception.IncorrectIdException;
-import ro.itschool.Booking.exception.IncorretNameException;
-import ro.itschool.Booking.exception.MobileNumberException;
+import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.customException.IncorretNameException;
+import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.service.PersonService;
 import ro.itschool.Booking.service.PropertyService;
 
