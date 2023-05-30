@@ -3,15 +3,14 @@ package ro.itschool.Booking.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.PropertyDTO;
 import ro.itschool.Booking.convertorDTO.PropertyConvertor;
 import ro.itschool.Booking.entity.Property;
-import ro.itschool.Booking.exception.IncorrectIdException;
-import ro.itschool.Booking.exception.IncorretNameException;
+import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PropertyService;
 
