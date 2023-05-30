@@ -11,7 +11,6 @@ import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.repository.PersonRepository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -45,7 +44,7 @@ public class PersonService {
     //Post
     public Person savePerson(Person person) throws MobileNumberException, IncorretNameException {
         checkEmailExists(person);
-        checkEmail(person);
+        checkToHaveSpecificCharacterInEmail(person);
         checkMobileNumber(person);
         return personRepository.save(person);
 
@@ -64,7 +63,7 @@ public class PersonService {
             sMessage = "Its an error with saving a person";
         }
         try {
-            //TODO check why is an error when i tried to save or update
+
             person = savePerson(person_p);
         } catch (Exception e) {
             throw new RuntimeException(sMessage);
@@ -87,11 +86,11 @@ public class PersonService {
         }
     }
 
-    private void checkEmail(Person person) throws IncorretNameException {
+    private void checkToHaveSpecificCharacterInEmail(Person person) throws IncorretNameException {
         Optional<Person> checkEmail = personRepository.findByEmail(person.getEmail());
         if (checkEmail.isPresent()) {
-            if (!person.getEmail().contains("@")) {
-                throw new IncorretNameException("Invalid email, must contain @ symbol");
+            if (!person.getEmail().contains("@yahoo") || !person.getEmail().contains("@gmail")) {
+                throw new IncorretNameException("Invalid email, only accepted @yahoo and @gmail");
             }
         }
     }
@@ -105,7 +104,7 @@ public class PersonService {
         updatePerson.setFirstName(person.getFirstName());
         updatePerson.setMobileNumber(person.getMobileNumber());
         updatePerson.setEmail(person.getEmail());
-        checkEmail(person);
+        checkToHaveSpecificCharacterInEmail(person);
         checkMobileNumber(person);
     }
 
