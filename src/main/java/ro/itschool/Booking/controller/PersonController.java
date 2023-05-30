@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
 import ro.itschool.Booking.convertorDTO.PersonConvertor;
+import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
@@ -50,11 +51,11 @@ public class PersonController {
         return new ResponseEntity<>(checkIfIdExistsConvertToDto(id), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/save-person")
-    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
+    @PostMapping(value = "/save")
+    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException, PersonNotFoundException {
         LOGGER.info("Saving a person");
         PersonConvertor personConvertor = new PersonConvertor();
-        personService.savePerson(person);
+        personService.createOrUpdatePerson(person,null);
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
 
@@ -69,9 +70,10 @@ public class PersonController {
 
 
     @PutMapping(value = "/update-person/{id}")
-    public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException {
+    public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException, PersonNotFoundException {
         LOGGER.info("Updating a person using the id value");
-        checkIdExists(id);
+        checkIFIdExists(id);
+        personService.createOrUpdatePerson(person,id);
         PersonConvertor personConvertor = new PersonConvertor();
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
@@ -81,7 +83,7 @@ public class PersonController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Long> deletePerson(@PathVariable Long id) throws IncorrectIdException {
         LOGGER.info("Deleting a person using the id value");
-        checkIdExists(id);
+        checkIFIdExists(id);
         return new ResponseEntity<>(id, HttpStatus.OK);
 
     }
@@ -95,7 +97,7 @@ public class PersonController {
         return idExists.map(Person::toDTO);
     }
 
-    private void checkIdExists(Long id) throws IncorrectIdException {
+    private void checkIFIdExists(Long id) throws IncorrectIdException {
         Optional<Person> checkId = personService.findById(id);
         if (checkId.isEmpty()) {
             throw new IncorrectIdException("This id doesn't exists!");

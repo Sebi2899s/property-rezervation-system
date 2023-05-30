@@ -1,6 +1,9 @@
 package ro.itschool.Booking.service;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
+import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
@@ -8,6 +11,7 @@ import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.repository.PersonRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -32,6 +36,11 @@ public class PersonService {
         }
     }
 
+    public Person getPersonOrThrow(Long id) throws PersonNotFoundException {
+        Optional<Person> person = personRepository.findById(id);
+        return person.orElseThrow(() -> new PersonNotFoundException("this person is not found"));
+    }
+
 
     //Post
     public Person savePerson(Person person) throws MobileNumberException, IncorretNameException {
@@ -40,6 +49,27 @@ public class PersonService {
         checkMobileNumber(person);
         return personRepository.save(person);
 
+    }
+
+    public Person createOrUpdatePerson(@NotNull Person person_p, @Nullable Long id) throws PersonNotFoundException {
+        Person person;
+        String sMessage = null;
+        //update case
+        if (id != null) {
+            person = getPersonOrThrow(id);
+            sMessage = "Its an error with updating a person";
+
+        } else {
+            person_p.setPersonId(null);
+            sMessage = "Its an error with saving a person";
+        }
+        try {
+            //TODO check why is an error when i tried to save or update
+            person = savePerson(person_p);
+        } catch (Exception e) {
+            throw new RuntimeException(sMessage);
+        }
+        return person;
     }
 
     private void checkEmailExists(Person person) throws IncorretNameException {

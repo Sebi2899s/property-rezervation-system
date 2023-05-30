@@ -15,6 +15,11 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), incorrectIdException.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleIncorrectIdEx(PersonNotFoundException personNotFoundException, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), personNotFoundException.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
     @ExceptionHandler(InvalidMailException.class)
     public ResponseEntity<ErrorDetails> handleInvalidMailException(InvalidMailException invalidMailException, WebRequest request){
         ErrorDetails errorDetails = new ErrorDetails(new Date(), invalidMailException.getMessage(),request.getDescription(false));
