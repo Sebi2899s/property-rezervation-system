@@ -15,6 +15,11 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), incorrectIdException.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(PropertyNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handlePropertyNotFoundEx(PropertyNotFoundException propertyNotFoundException, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), propertyNotFoundException.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
     @ExceptionHandler(PersonNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleIncorrectIdEx(PersonNotFoundException personNotFoundException, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), personNotFoundException.getMessage(), request.getDescription(false));

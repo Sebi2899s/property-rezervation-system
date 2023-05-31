@@ -58,24 +58,24 @@ public class PropertyController {
         return new ResponseEntity<>(propertyByPersonFirstName.stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/save-property")
+    @PostMapping(value = "/save")
     public ResponseEntity<PropertyDTO> saveProperty(@RequestBody Property property) {
         LOGGER.info("Saving a property");
         PropertyConvertor propertyConvertor = new PropertyConvertor();
-        propertyService.createProperty(property);
+        propertyService.createOrUpdateProperty(property,null);
         return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
     }
 
 
-    @PutMapping(value = "/update-property/{id}")
+    @PutMapping(value = "/update/{id}")
     public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @RequestBody Property property) throws IncorrectIdException {
         LOGGER.info("Updating a property using the id value");
-        propertyService.updateProperty(id, property);
+        propertyService.createOrUpdateProperty(property,id);
         PropertyConvertor propertyConvertor = new PropertyConvertor();
         return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/delete-property/{id}")
+    @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<Long> deleteProperty(@PathVariable Long id) throws IncorrectIdException {
         LOGGER.info("Deleting a property using the id value");
         propertyService.deleteProperty(id);

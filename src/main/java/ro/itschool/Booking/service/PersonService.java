@@ -2,6 +2,7 @@ package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
@@ -10,6 +11,7 @@ import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.repository.PersonRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,5 +125,14 @@ public class PersonService {
 
     public Optional<Person> findById(Long id) {
         return personRepository.findById(id);
+    }
+
+    public List<Person> searchByFirstNameAndOrLastName(@Param("firstName") String firstName,
+                                                       @Param("lastName") String lastName) {
+        List<Person> personList = new ArrayList<>();
+        personList.addAll(personRepository.searchByMailOrUsername(firstName, lastName).isEmpty() ? null : personRepository.searchByMailOrUsername(firstName, lastName));
+
+        return personList;
+
     }
 }

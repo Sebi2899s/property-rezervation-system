@@ -1,5 +1,8 @@
 package ro.itschool.Booking.service;
 
+import jakarta.annotation.Nullable;
+import jakarta.el.PropertyNotFoundException;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.entity.Property;
@@ -40,6 +43,11 @@ public class PropertyService {
             return propertyRepository.findByPropertyName(propertyName);
     }
 
+    public Property getPropertyOrThrow(Long id) {
+        Optional<Property> property = findById(id);
+        return property.orElseThrow(() -> new PropertyNotFoundException("Property with this id" + id + "was not found!"));
+    }
+
     //get property by property type using query specification
     public List<Property> getPropertyByPropertyType(String propertyTipe) {
         Specification<Property> propertySpecification = Specifications.getPropertyByPropertyType(propertyTipe);
@@ -55,12 +63,32 @@ public class PropertyService {
     //POST
     public Property createProperty(Property property) {
         Property save = null;
-        if (property==null) {
+        if (property == null) {
             propertyEmailExistsCheck(property);
-        }else {
-             save = propertyRepository.save(property);
+        } else {
+            save = propertyRepository.save(property);
         }
         return save;
+    }
+
+    public Property createOrUpdateProperty(@NotNull Property property_p, @Nullable Long id) {
+        Property property;
+        String sMessage = null;
+        //update case
+        if (id != null) {
+            property = getPropertyOrThrow(id);
+            sMessage = "Error in updating property";
+        } else {
+            property_p.setId(null);
+            sMessage = "Error in saving property";
+        }
+        try {
+
+            property = createProperty(property_p);
+        } catch (Exception e) {
+            throw new RuntimeException(sMessage);
+        }
+        return property;
     }
 
 
@@ -86,10 +114,10 @@ public class PropertyService {
     }
 
     //DELETE
-    public void deleteProperty(Long id) throws IncorrectIdException {
-        Optional<Property> checkId = propertyRepository.findById(id);
-        if (checkId.isEmpty())
-            throw new IncorrectIdException("This id" + id + "is not found!");
+    public void deleteProperty(Long id) {
+        Optional<Property> person = propertyRepository.findById(id);
+        if (person.isEmpty())
+            throw new PropertyNotFoundException("This property with id " + id + " was not found!");
         else {
             propertyRepository.deleteById(id);
         }

@@ -55,7 +55,7 @@ public class PersonController {
     public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException, PersonNotFoundException {
         LOGGER.info("Saving a person");
         PersonConvertor personConvertor = new PersonConvertor();
-        personService.createOrUpdatePerson(person,null);
+        personService.createOrUpdatePerson(person, null);
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
 
@@ -63,17 +63,16 @@ public class PersonController {
     @PutMapping(value = "/{idPerson}/property-reservations/{idProperty}")
     public ResponseEntity<Person> reservation(@PathVariable Long idPerson, @PathVariable Long idProperty, @RequestBody Person personCheck) {
         LOGGER.info("Updating a person to the property");
-        Person person = rezervationWithIdPersonIdProperty(idPerson, idProperty, personCheck);
+        Person person = reservationWithIdPersonIdProperty(idPerson, idProperty, personCheck);
         return new ResponseEntity<>(personRepository.save(person), HttpStatus.OK);
     }
-
 
 
     @PutMapping(value = "/update-person/{id}")
     public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException, PersonNotFoundException {
         LOGGER.info("Updating a person using the id value");
         checkIFIdExists(id);
-        personService.createOrUpdatePerson(person,id);
+        personService.createOrUpdatePerson(person, id);
         PersonConvertor personConvertor = new PersonConvertor();
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
@@ -86,6 +85,10 @@ public class PersonController {
         checkIFIdExists(id);
         return new ResponseEntity<>(id, HttpStatus.OK);
 
+    }
+    @GetMapping(value = "/search")
+    public List<Person> searchByFirstNameAndOrLastName(String firstName, String lastName) {
+        return personService.searchByFirstNameAndOrLastName(firstName, lastName);
     }
 
 
@@ -103,7 +106,8 @@ public class PersonController {
             throw new IncorrectIdException("This id doesn't exists!");
         }
     }
-    private Person rezervationWithIdPersonIdProperty(Long idPerson, Long idProperty, Person personCheck) {
+
+    private Person reservationWithIdPersonIdProperty(Long idPerson, Long idProperty, Person personCheck) {
         Person person = personRepository.findById(idPerson).orElseThrow(() -> new IllegalStateException("This id" + idPerson + "was not found!"));
         Property property = propertyRepository.findById(idProperty).orElseThrow(() -> new IllegalStateException("This id" + idProperty + "was not found!"));
         person.assignProperty(property);
@@ -111,4 +115,6 @@ public class PersonController {
         person.setCheckOut(personCheck.getCheckOut());//add check-out
         return person;
     }
+
+
 }
