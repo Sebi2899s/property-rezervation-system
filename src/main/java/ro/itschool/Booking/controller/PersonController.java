@@ -54,7 +54,7 @@ public class PersonController {
     }
 
     @GetMapping(value = "/search")
-    public List<Person> searchByFirstNameAndOrLastName(String firstName, String lastName) {
+    public List<PersonDTO> searchByFirstNameAndOrLastName(String firstName, String lastName) {
         return personService.searchByFirstNameAndOrLastName(firstName, lastName);
     }
 
