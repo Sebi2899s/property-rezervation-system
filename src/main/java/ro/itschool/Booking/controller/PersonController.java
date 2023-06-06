@@ -52,7 +52,7 @@ public class PersonController {
     }
 
     @PostMapping(value = "/save")
-    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException, PersonNotFoundException {
+    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws PersonNotFoundException {
         LOGGER.info("Saving a person");
         PersonConvertor personConvertor = new PersonConvertor();
         personService.createOrUpdatePerson(person, null);
