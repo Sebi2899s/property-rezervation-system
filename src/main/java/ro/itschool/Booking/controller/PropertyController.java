@@ -1,5 +1,6 @@
 package ro.itschool.Booking.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PropertyService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -39,9 +41,9 @@ public class PropertyController {
         return propertyService.getAllProperties().stream().map(Property::toDTO).toList();
     }
 
-//get reservation by name
+    //get reservation by name
     @GetMapping(value = "/get-reservation")
-    public ResponseEntity<List<PropertyDTO>> properties(@RequestParam String name) throws IncorretNameException {
+    public ResponseEntity<List<PropertyDTO>> properties(@RequestParam String name) {
         LOGGER.info("Getting property by name");
         return new ResponseEntity<>(propertyService.getPropertiesByNameAndSortedAlphabetically(name).stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
@@ -57,7 +59,23 @@ public class PropertyController {
         List<Property> propertyByPersonFirstName = propertyService.getPropertyByPersonFirstName(firstName);
         return new ResponseEntity<>(propertyByPersonFirstName.stream().map(Property::toDTO).toList(), HttpStatus.OK);
     }
+    @GetMapping(value = "/search")
+    public List<Property> searchByPropertyNameOrPropertyEmail(String propertyName, String propertyEmail) {
+        return propertyService.searchByPropertyNameOrPropertyEmail(propertyName, propertyEmail);
+    }
 
+    @GetMapping(value = "/excel")
+    public void generateExcelReport(HttpServletResponse response) throws IOException {
+
+
+        response.setContentType("application");
+
+        String headerKey="Content-Disposition";
+        String headerValue="attachment;filename=property.xls";
+
+        response.setHeader(headerKey,headerValue);
+        propertyService.generateExcel(response);
+    }
     @PostMapping(value = "/save")
     public ResponseEntity<PropertyDTO> saveProperty(@RequestBody Property property) {
         LOGGER.info("Saving a property");
@@ -68,7 +86,7 @@ public class PropertyController {
 
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @RequestBody Property property) throws IncorrectIdException {
+    public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @RequestBody Property property) {
         LOGGER.info("Updating a property using the id value");
         propertyService.createOrUpdateProperty(property,id);
         PropertyConvertor propertyConvertor = new PropertyConvertor();
@@ -76,7 +94,7 @@ public class PropertyController {
     }
 
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<Long> deleteProperty(@PathVariable Long id) throws IncorrectIdException {
+    public ResponseEntity<Long> deleteProperty(@PathVariable Long id) {
         LOGGER.info("Deleting a property using the id value");
         propertyService.deleteProperty(id);
         return new ResponseEntity<>(id, HttpStatus.OK);

@@ -1,5 +1,6 @@
 package ro.itschool.Booking.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import ro.itschool.Booking.repository.PersonRepository;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PersonService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +53,24 @@ public class PersonController {
         return new ResponseEntity<>(checkIfIdExistsConvertToDto(id), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/search")
+    public List<Person> searchByFirstNameAndOrLastName(String firstName, String lastName) {
+        return personService.searchByFirstNameAndOrLastName(firstName, lastName);
+    }
+
+    @GetMapping(value = "/excel")
+    public void generateExcelReport(HttpServletResponse response) throws IOException {
+
+
+        response.setContentType("application");
+
+        String headerKey="Content-Disposition";
+        String headerValue="attachment;filename=persons.xls";
+
+        response.setHeader(headerKey,headerValue);
+        personService.generateExcel(response);
+    }
+
     @PostMapping(value = "/save")
     public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws PersonNotFoundException {
         LOGGER.info("Saving a person");
@@ -58,8 +78,8 @@ public class PersonController {
         personService.createOrUpdatePerson(person, null);
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
-
     //make a rezervation with idperson and idproperty using update
+
     @PutMapping(value = "/{idPerson}/property-reservations/{idProperty}")
     public ResponseEntity<Person> reservation(@PathVariable Long idPerson, @PathVariable Long idProperty, @RequestBody Person personCheck) {
         LOGGER.info("Updating a person to the property");
@@ -77,7 +97,6 @@ public class PersonController {
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
 
-
     @DeleteMapping(value = "/delete/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Long> deletePerson(@PathVariable Long id) throws IncorrectIdException {
@@ -85,10 +104,6 @@ public class PersonController {
         checkIFIdExists(id);
         return new ResponseEntity<>(id, HttpStatus.OK);
 
-    }
-    @GetMapping(value = "/search")
-    public List<Person> searchByFirstNameAndOrLastName(String firstName, String lastName) {
-        return personService.searchByFirstNameAndOrLastName(firstName, lastName);
     }
 
 

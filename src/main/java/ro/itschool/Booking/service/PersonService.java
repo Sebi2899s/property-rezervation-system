@@ -1,7 +1,12 @@
 package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.customException.PersonNotFoundException;
@@ -11,6 +16,7 @@ import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.repository.PersonRepository;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -130,9 +136,33 @@ public class PersonService {
     public List<Person> searchByFirstNameAndOrLastName(@Param("firstName") String firstName,
                                                        @Param("lastName") String lastName) {
         List<Person> personList = new ArrayList<>();
-        personList.addAll(personRepository.searchByMailOrUsername(firstName, lastName).isEmpty() ? null : personRepository.searchByMailOrUsername(firstName, lastName));
+        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName));
 
         return personList;
 
+    }
+
+    public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
+        List<Person> personList = personRepository.findAll();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("List With Persons");
+        HSSFRow row = sheet.createRow(0);
+        row.createCell(0).setCellValue("ID");
+        row.createCell(0).setCellValue("First Name");
+        row.createCell(0).setCellValue("Last Name");
+        row.createCell(0).setCellValue("Email");
+
+        int dataRowIndex = 1;
+        for (Person person : personList) {
+            HSSFRow dataRow = sheet.createRow(dataRowIndex);
+            dataRow.createCell(0).setCellValue(person.getPersonId());
+            dataRow.createCell(1).setCellValue(person.getFirstName());
+            dataRow.createCell(2).setCellValue(person.getLastName());
+            dataRow.createCell(3).setCellValue(person.getEmail());
+            dataRowIndex++;
+        }
+        ServletOutputStream outputStream = httpServletResponse.getOutputStream();
+        workbook.write(outputStream);
+        outputStream.close();
     }
 }

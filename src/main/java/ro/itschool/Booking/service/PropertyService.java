@@ -2,15 +2,23 @@ package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
 import jakarta.el.PropertyNotFoundException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.specifications.Specifications;
 
+import java.io.IOException;
 import java.util.*;
 
 //@Service
@@ -58,6 +66,40 @@ public class PropertyService {
     public List<Property> getPropertyByPersonFirstName(String firstName) {
         Specification<Property> specifications = Specifications.getPropertyByPersonFirstName(firstName);
         return propertyRepository.findAll(specifications);
+    }
+
+    public List<Property> searchByPropertyNameOrPropertyEmail(@Param("propertyName") String propertyName,
+                                                              @Param("propertyEmail") String propertyEmail) {
+        List<Property> propertyList = new ArrayList<>();
+        propertyList.addAll(propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail).isEmpty() ? null : propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail));
+
+        return propertyList;
+
+    }
+
+    //excel of all persons
+    public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
+        List<Property> propertyList = propertyRepository.findAll();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("List With Properties");
+        HSSFRow row = sheet.createRow(0);
+        row.createCell(0).setCellValue("ID");
+        row.createCell(0).setCellValue("Property Name");
+        row.createCell(0).setCellValue("Property Email");
+        row.createCell(0).setCellValue("Property Address");
+
+        int dataRowIndex = 1;
+        for (Property property : propertyList) {
+            HSSFRow dataRow = sheet.createRow(dataRowIndex);
+            dataRow.createCell(0).setCellValue(property.getId());
+            dataRow.createCell(1).setCellValue(property.getPropertyName());
+            dataRow.createCell(2).setCellValue(property.getPropertyEmail());
+            dataRow.createCell(3).setCellValue(property.getPropertyAddress());
+            dataRowIndex++;
+        }
+        ServletOutputStream outputStream = httpServletResponse.getOutputStream();
+        workbook.write(outputStream);
+        outputStream.close();
     }
 
     //POST
