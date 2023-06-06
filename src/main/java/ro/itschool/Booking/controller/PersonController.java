@@ -65,7 +65,7 @@ public class PersonController {
         response.setContentType("application");
 
         String headerKey="Content-Disposition";
-        String headerValue="attachment;filename=persons.xls";
+        String headerValue="attachment;filename=persons.xlsx";
 
         response.setHeader(headerKey,headerValue);
         personService.generateExcel(response);

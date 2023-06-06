@@ -77,7 +77,7 @@ public class PropertyService {
 
     }
 
-    //excel of all persons
+    //excel file report of all persons
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
         List<Property> propertyList = propertyRepository.findAll();
         HSSFWorkbook workbook = new HSSFWorkbook();
