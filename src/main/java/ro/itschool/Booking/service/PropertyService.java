@@ -8,9 +8,14 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
@@ -39,8 +44,18 @@ public class PropertyService {
     }
 
     //GET
-    public List<Property> getAllProperties() {
-        return propertyRepository.findAll();
+    public List<Property> getAllProperties(Integer pageNo,
+                                           Integer pageSize,
+                                           String sortBy) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+
+        Page<Property> pagedResult = propertyRepository.findAll(paging);
+
+        if(pagedResult.hasContent()) {
+            return pagedResult.getContent();
+        } else {
+            return new ArrayList<Property>();
+        }
     }
 
     //GET by property name
@@ -68,10 +83,13 @@ public class PropertyService {
         return propertyRepository.findAll(specifications);
     }
 
-    public List<Property> searchByPropertyNameOrPropertyEmail(@Param("propertyName") String propertyName,
-                                                              @Param("propertyEmail") String propertyEmail) {
+    public List<Property> searchByPropertyNameOrPropertyEmail(String propertyName,
+                                                              String propertyEmail,
+                                                              Integer page,
+                                                              Integer pageSize,
+                                                              String sortBy) {
         List<Property> propertyList = new ArrayList<>();
-        propertyList.addAll(propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail).isEmpty() ? null : propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail));
+        propertyList.addAll(propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail, page, pageSize, sortBy).isEmpty() ? null : propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail, page, pageSize, sortBy));
 
         return propertyList;
 

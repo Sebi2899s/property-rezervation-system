@@ -29,14 +29,18 @@ public class AdminController {
 
     @GetMapping(value = "/get-users")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<Person>> getAllUsers() {
-        return new ResponseEntity<>(personService.getAllPersons(), HttpStatus.OK);
+    public ResponseEntity<List<Person>> getAllUsers(@RequestParam(defaultValue = "0") Integer pageNo,
+                                                    @RequestParam(defaultValue = "10") Integer pageSize,
+                                                    @RequestParam(defaultValue = "id") String sortBy) {
+        return new ResponseEntity<>(personService.getAllPersons(pageNo, pageSize, sortBy), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-properties")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<Property>> getAllProperties() {
-        return new ResponseEntity<>(propertyService.getAllProperties(), HttpStatus.OK);
+    public ResponseEntity<List<Property>> getAllProperties(@RequestParam(defaultValue = "0") Integer pageNo,
+                                                           @RequestParam(defaultValue = "10") Integer pageSize,
+                                                           @RequestParam(defaultValue = "ASC") String sortBy) {
+        return new ResponseEntity<>(propertyService.getAllProperties(pageNo, pageSize, sortBy), HttpStatus.OK);
     }
 
     @PostMapping(value = "/add-user")

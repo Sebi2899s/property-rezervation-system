@@ -8,8 +8,13 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
@@ -35,10 +40,23 @@ public class PersonService {
     }
 
     //GET
-    public List<Person> getAllPersons() {
-        return personRepository.findAll();
+//---------------------------------------------------------------------------------------------------------------------
+    public List<Person> getAllPersons(Integer pageNo,
+                                      Integer pageSize,
+                                      String sortBy) {
+
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+
+        Page<Person> pagedResult = personRepository.findAll(paging);
+
+        if (pagedResult.hasContent()) {
+            return pagedResult.getContent();
+        } else {
+            return new ArrayList<Person>();
+        }
     }
 
+    //\---------------------------------------------------------------------------------------------------------------------
     public Optional<PersonDTO> getById(Long id) throws IncorrectIdException {
         Optional<Person> person = personRepository.findById(id);
         PersonDTO personDto = mapper.map(person, PersonDTO.class);
@@ -49,6 +67,10 @@ public class PersonService {
         }
     }
 
+
+//---------------------------------------------------------------------------------------------------------------------
+
+
     public Person getPersonOrThrow(Long id) throws PersonNotFoundException {
         Optional<Person> person = personRepository.findById(id);
         return person.orElseThrow(() -> new PersonNotFoundException("this person is not found"));
@@ -56,6 +78,7 @@ public class PersonService {
 
 
     //Post
+//---------------------------------------------------------------------------------------------------------------------
     public Person savePerson(Person person) throws MobileNumberException, IncorretNameException {
         checkEmailExists(person);
         checkToHaveSpecificCharacterInEmail(person);
@@ -64,6 +87,8 @@ public class PersonService {
 
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Person createOrUpdatePerson(@NotNull Person person_p, @Nullable Long id) throws PersonNotFoundException {
         Person person;
         String sMessage = null;
@@ -85,6 +110,8 @@ public class PersonService {
         return person;
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     private void checkEmailExists(Person person) throws IncorretNameException {
         Optional<Person> checkEmailExists = personRepository.findByEmail(person.getEmail());
         if (checkEmailExists.isPresent()) {
@@ -92,6 +119,8 @@ public class PersonService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //method to check if mobile number exists
     private void checkMobileNumber(Person person) throws MobileNumberException {
         Optional<Object> savePerson = personRepository.getPersonByMobileNumber(person.getMobileNumber());
@@ -100,6 +129,8 @@ public class PersonService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     private void checkToHaveSpecificCharacterInEmail(Person person) throws IncorretNameException {
         Optional<Person> checkEmail = personRepository.findByEmail(person.getEmail());
         if (checkEmail.isPresent()) {
@@ -110,6 +141,7 @@ public class PersonService {
     }
 
     //UPDATE
+//---------------------------------------------------------------------------------------------------------------------
     public void updatePerson(Long id, Person person) throws IncorretNameException, MobileNumberException, IncorrectIdException {
         Person updatePerson = personRepository.findById(id).orElseThrow(
                 () -> new IncorrectIdException(String.format("This id %s is not found", person.getPersonId())));
@@ -122,28 +154,55 @@ public class PersonService {
         checkMobileNumber(person);
     }
 
+
     //DELETE
+//---------------------------------------------------------------------------------------------------------------------
+
     public void deletePerson(Long id) throws IncorrectIdException {
         if (id == null) {
             throw new IncorrectIdException("This id " + id
                     + " is not found");
-        } else
-            personRepository.deleteById(id);
+        } else {
+                Person person_p = (personRepository.findById(id).orElseThrow(() -> new IncorrectIdException("There are no person that have this id:"+id)));
+                personRepository.delete(person_p);
+        }
     }
+
+//---------------------------------------------------------------------------------------------------------------------
 
     public Optional<Person> findByEmail(String email) {
-        return personRepository.findByEmail(email);
+        Optional<Person> getEmail = personRepository.findByEmail(email);
+        if (getEmail != null) {
+
+            return getEmail;
+        } else {
+            return getEmail = null;
+        }
     }
+
+
+//---------------------------------------------------------------------------------------------------------------------
 
     public Optional<Person> findById(Long id) {
-        return personRepository.findById(id);
+        Optional<Person> findByPersonId = personRepository.findById(id);
+        if (findByPersonId != null) {
+            return findByPersonId;
+        } else {
+            return null;
+        }
+
     }
 
-    public List<PersonDTO> searchByFirstNameAndOrLastName(@Param("firstName") String firstName,
-                                                          @Param("lastName") String lastName) {
+//---------------------------------------------------------------------------------------------------------------------
+
+    public List<PersonDTO> searchByFirstNameAndOrLastName(String firstName,
+                                                          String lastName,
+                                                          Integer pageNo,
+                                                          Integer pageSize,
+                                                          String sortBy) {
         List<Person> personList = new ArrayList<>();
         List<PersonDTO> personDTOList = new ArrayList<>();
-        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName));
+        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize, sortBy).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize, sortBy));
         for (Person person : personList) {
             PersonDTO personDTO = mapper.map(person, PersonDTO.class);
             personDTOList.add(personDTO);
@@ -152,6 +211,9 @@ public class PersonService {
 
     }
 
+
+    // generate EXCEL
+    //---------------------------------------------------------------------------------------------------------------------
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
         List<Person> personList = personRepository.findAll();
         HSSFWorkbook workbook = new HSSFWorkbook();
