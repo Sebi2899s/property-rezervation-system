@@ -1,9 +1,11 @@
 package ro.itschool.Booking.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 import ro.itschool.Booking.entity.Person;
@@ -18,11 +20,4 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
 
     Optional<Person> findByEmail(String email);
 
-    @Query(value = "SELECT p.firstName, p.lastName FROM person p WHERE (:firstName is null or p.firstName = :firstName))" +
-            "AND (:lastName is null or p.lastName = :lastName)",nativeQuery = true)
-    List<Person> searchFirstNameOrLastName(String firstName,
-                                           String lastName,
-                                          Integer pageNo,
-                                           Integer pageSize,
-                                           String sortBy);
 }

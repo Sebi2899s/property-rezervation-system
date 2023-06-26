@@ -68,17 +68,6 @@ public class PropertyController {
 
 
 //---------------------------------------------------------------------------------------------------------------------
-    @GetMapping(value = "/search")
-    public List<Property> searchByPropertyNameOrPropertyEmail(@Param("propertyName") String propertyName,
-                                                              @Param("propertyEmail") String propertyEmail,
-                                                              @RequestParam(defaultValue = "0") Integer pageNo,
-                                                              @RequestParam(defaultValue = "10") Integer pageSize,
-                                                              @RequestParam(defaultValue = "ASC") String sortBy) {
-        return propertyService.searchByPropertyNameOrPropertyEmail(propertyName, propertyEmail, pageNo, pageSize, sortBy);
-    }
-
-
-//---------------------------------------------------------------------------------------------------------------------
     @GetMapping(value = "/excel")
     public void generateExcelReport(HttpServletResponse response) throws IOException {
 

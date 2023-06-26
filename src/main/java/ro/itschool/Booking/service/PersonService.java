@@ -8,6 +8,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,14 +32,11 @@ import java.util.Optional;
 
 @Service
 public class PersonService {
-    private final PersonRepository personRepository;
+    @Autowired
+    private  PersonRepository personRepository;
+    @Autowired
+    private ModelMapper mapper;
 
-    private final ModelMapper mapper;
-
-    public PersonService(PersonRepository personRepository, ModelMapper mapper) {
-        this.personRepository = personRepository;
-        this.mapper = mapper;
-    }
 
     //GET
 //---------------------------------------------------------------------------------------------------------------------
@@ -163,8 +162,8 @@ public class PersonService {
             throw new IncorrectIdException("This id " + id
                     + " is not found");
         } else {
-                Person person_p = (personRepository.findById(id).orElseThrow(() -> new IncorrectIdException("There are no person that have this id:"+id)));
-                personRepository.delete(person_p);
+            Person person_p = (personRepository.findById(id).orElseThrow(() -> new IncorrectIdException("There are no person that have this id:" + id)));
+            personRepository.delete(person_p);
         }
     }
 
@@ -195,21 +194,21 @@ public class PersonService {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-    public List<PersonDTO> searchByFirstNameAndOrLastName(String firstName,
-                                                          String lastName,
-                                                          Integer pageNo,
-                                                          Integer pageSize,
-                                                          String sortBy) {
-        List<Person> personList = new ArrayList<>();
-        List<PersonDTO> personDTOList = new ArrayList<>();
-        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize, sortBy).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize, sortBy));
-        for (Person person : personList) {
-            PersonDTO personDTO = mapper.map(person, PersonDTO.class);
-            personDTOList.add(personDTO);
-        }
-        return personDTOList;
-
-    }
+//    public List<PersonDTO> searchByFirstNameAndOrLastName(String firstName,
+//                                                          String lastName,
+//                                                          Integer pageNo,
+//                                                          Integer pageSize,
+//                                                          String sortBy) {
+//        List<Person> personList = new ArrayList<>();
+//        List<PersonDTO> personDTOList = new ArrayList<>();
+//        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize));
+//        for (Person person : personList) {
+//            PersonDTO personDTO = mapper.map(person, PersonDTO.class);
+//            personDTOList.add(personDTO);
+//        }
+//        return personDTOList;
+//
+//    }
 
 
     // generate EXCEL

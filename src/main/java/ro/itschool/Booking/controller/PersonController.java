@@ -55,15 +55,6 @@ public class PersonController {
     }
 
 
-    //---------------------------------------------------------------------------------------------------------------------
-    @GetMapping(value = "/search")
-    public List<PersonDTO> searchByFirstNameAndOrLastName(@Param("firstName") String firstName,
-                                                          @Param("lastName") String lastName,
-                                                          @RequestParam(defaultValue = "0") Integer pageNo,
-                                                          @RequestParam(defaultValue = "10") Integer pageSize,
-                                                          @RequestParam(defaultValue = "ASC") String sortBy) {
-        return personService.searchByFirstNameAndOrLastName(firstName, lastName, pageNo, pageSize, sortBy);
-    }
 
 
     //---------------------------------------------------------------------------------------------------------------------

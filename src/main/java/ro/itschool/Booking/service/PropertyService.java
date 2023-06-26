@@ -83,17 +83,7 @@ public class PropertyService {
         return propertyRepository.findAll(specifications);
     }
 
-    public List<Property> searchByPropertyNameOrPropertyEmail(String propertyName,
-                                                              String propertyEmail,
-                                                              Integer page,
-                                                              Integer pageSize,
-                                                              String sortBy) {
-        List<Property> propertyList = new ArrayList<>();
-        propertyList.addAll(propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail, page, pageSize, sortBy).isEmpty() ? null : propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail, page, pageSize, sortBy));
 
-        return propertyList;
-
-    }
 
     //excel file report of all persons
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {

@@ -24,11 +24,4 @@ public interface PropertyRepository extends JpaRepository<Property, Long>, JpaSp
     @Query(value = "SELECT property.name FROM Property WHERE property.name=%name%", nativeQuery = true)
     Optional<List<Property>> getPropertyNameAndFilter(String name);
 
-    @Query(value = "SELECT p.propertyName, p.propertyEmail FROM property p WHERE (:propertyName is null or p.propertyName = :propertyName))" +
-            "AND (:propertyEmail is null or p.propertyEmail = :propertyEmail)", nativeQuery = true)
-    List<Property> searchPropertyNameOrPropertyEmail(String propertyName,
-                                                     String propertyEmail,
-                                                     Integer page,
-                                                     Integer pageSize,
-                                                     String sortBy);
 }
