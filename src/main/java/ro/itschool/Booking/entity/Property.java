@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import ro.itschool.Booking.DtoEntity.PropertyDTO;
+import ro.itschool.Booking.util.CloneProperty;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 //@Builder
-public class Property {
+public class Property implements CloneProperty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,6 +44,9 @@ public class Property {
         this.propertyLocation = propertyLocation;
         this.propertyAddress = propertyAddress;
     }
+    public Property(Property property){
+
+    }
 
 
     public PropertyDTO toDTO() {
@@ -64,7 +68,14 @@ public class Property {
     public static PropertyBuilder builder(){
         return new PropertyBuilder();
     }
-//implementing Builder Design Pattern for Property class
+
+//implement Prototype Design Pattern that clone objects
+    @Override
+    public Property clone() {
+        return new Property(this);
+    }
+
+    //implementing Builder Design Pattern for Property class
     public static class PropertyBuilder {
         private Property property;
 

@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ro.itschool.Booking.DtoEntity.PersonDTO;
+import ro.itschool.Booking.util.ClonePerson;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -20,7 +21,7 @@ import java.util.Objects;
 //@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person implements UserDetails {
+public class Person implements UserDetails, ClonePerson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +60,9 @@ public class Person implements UserDetails {
         this.mobileNumber = Objects.requireNonNull(mobileNumber);
     }
 
+    public Person(Person person) {
+
+    }
 
     public PersonDTO toDTO() {
         return new PersonDTO(personId, firstName, lastName, email);
@@ -104,48 +108,61 @@ public class Person implements UserDetails {
         return true;
     }
 
-    public static PersonBuilder builder(){
+    public static PersonBuilder builder() {
         return new PersonBuilder();
     }
 
+    //implement Prototype Design Pattern that clone objects
+    @Override
+    public Person clone() {
+        return new Person(this);
+    }
+
     //implementing Builder Design Pattern for Person class
-    public static class PersonBuilder{
+    public static class PersonBuilder {
         private Person person;
 
-        private PersonBuilder(){
-            this.person=new Person();
+        private PersonBuilder() {
+            this.person = new Person();
         }
 
-        private PersonBuilder personId(Long id){
-            this.person.personId=id;
+        private PersonBuilder personId(Long id) {
+            this.person.personId = id;
             return this;
         }
+
         public PersonBuilder firstName(String firstName) {
             this.person.firstName = firstName;
             return this;
         }
+
         public PersonBuilder lastName(String lastName) {
             this.person.lastName = lastName;
             return this;
         }
+
         public PersonBuilder email(String email) {
             this.person.email = email;
             return this;
         }
+
         public PersonBuilder password(String password) {
             this.person.password = password;
             return this;
         }
-        public PersonBuilder checkIn(LocalDate checkIn){
-            this.person.checkIn=checkIn;
+
+        public PersonBuilder checkIn(LocalDate checkIn) {
+            this.person.checkIn = checkIn;
             return this;
         }
-        public PersonBuilder checkOut(LocalDate checkOut){
-            this.person.checkOut=checkOut;
+
+        public PersonBuilder checkOut(LocalDate checkOut) {
+            this.person.checkOut = checkOut;
             return this;
         }
-        public PersonBuilder role(Role role){
-            this.person.role=role;
+
+        public PersonBuilder role(Role role) {
+            this.person.role = role;
             return this;
         }
 
@@ -153,11 +170,13 @@ public class Person implements UserDetails {
             this.person.mobileNumber = mobileNumber;
             return this;
         }
+
         public PersonBuilder property(Property property) {
             this.person.property = property;
             return this;
         }
-        public Person build(){
+
+        public Person build() {
             return this.person;
         }
     }

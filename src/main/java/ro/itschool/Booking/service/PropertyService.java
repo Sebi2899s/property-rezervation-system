@@ -50,8 +50,7 @@ public class PropertyService {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 
         Page<Property> pagedResult = propertyRepository.findAll(paging);
-
-        if(pagedResult.hasContent()) {
+        if (pagedResult.hasContent()) {
             return pagedResult.getContent();
         } else {
             return new ArrayList<Property>();
@@ -82,7 +81,6 @@ public class PropertyService {
         Specification<Property> specifications = Specifications.getPropertyByPersonFirstName(firstName);
         return propertyRepository.findAll(specifications);
     }
-
 
 
     //excel file report of all persons
