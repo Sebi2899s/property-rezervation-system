@@ -37,6 +37,9 @@ public class PersonService {
     @Autowired
     private ModelMapper mapper;
 
+    public PersonService(PersonRepository repository) {
+    }
+
 
     //GET
 //---------------------------------------------------------------------------------------------------------------------
