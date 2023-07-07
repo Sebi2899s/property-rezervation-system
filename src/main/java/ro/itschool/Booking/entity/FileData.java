@@ -6,8 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -22,7 +21,7 @@ public class FileData {
 
     private String name;
     private String type;
-    private LocalDate uploadTime;
+    private LocalDateTime uploadTime;
     @Lob
     @Column(name = "filedata")
     private byte[] fileData;

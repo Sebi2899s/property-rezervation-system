@@ -9,6 +9,7 @@ import ro.itschool.Booking.util.FileDataUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class StorageService {
                 .name(file.getOriginalFilename())
                 .type(file.getContentType())
                 .fileData(FileDataUtils.compressFile(file.getBytes()))
-                .uploadTime(LocalDate.now())
+                .uploadTime(LocalDateTime.now())
                 .build());
         if (fileData != null) {
             return FileDataUtils.FILE_UPLOADED_SUCCESSFULLY + " " + file.getOriginalFilename();
