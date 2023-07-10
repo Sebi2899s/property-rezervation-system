@@ -7,6 +7,7 @@ import ro.itschool.Booking.entity.FileData;
 import ro.itschool.Booking.repository.StorageRepository;
 import ro.itschool.Booking.util.FileDataUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,11 +38,21 @@ public class StorageService {
         byte[] byteFile = FileDataUtils.decompressFile(dbFileData.get().getFileData());
         return byteFile;
     }
-    public Optional<FileData> findById(Long id){
-        return storageRepository.findById(id);
+
+    public Optional<FileData> findById(Long id) {
+        Optional<FileData> getFileById = storageRepository.findById(id);
+        FileData o = getFileById.isEmpty() ? null : getFileById.get();
+        return getFileById;
     }
 
     public List<FileData> findAll() {
         return storageRepository.findAll();
+    }
+
+    public FileData saveFileData(FileData fileData){
+        return storageRepository.save(fileData);
+    }
+    public List<FileData> saveAllFiles(List<FileData> files){
+        return storageRepository.saveAll(files);
     }
 }

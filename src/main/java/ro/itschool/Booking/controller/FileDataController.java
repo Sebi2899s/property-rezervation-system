@@ -1,9 +1,15 @@
 package ro.itschool.Booking.controller;
 
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +19,8 @@ import ro.itschool.Booking.entity.FileData;
 import ro.itschool.Booking.service.StorageService;
 import ro.itschool.Booking.util.FileDataUtils;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -50,5 +57,23 @@ public class FileDataController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(decompressFileFromDb);
+    }
+
+
+    //download with csv
+    @GetMapping("/download/csv")
+    public void downloadCSV(HttpServletResponse response) throws IOException, CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"file.csv\"");
+
+        List<FileData> dataList = service.findAll();
+
+        StatefulBeanToCsv<FileData> writer = new StatefulBeanToCsvBuilder<FileData>(response.getWriter())
+                .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                .withOrderedResults(false)
+                .build();
+
+        writer.write(dataList);
     }
 }
