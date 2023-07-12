@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/bk/person")
+@RequestMapping(value = "/api/person")
 public class PersonController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonController.class);
     @Autowired
@@ -48,7 +48,7 @@ public class PersonController {
 
 
     //---------------------------------------------------------------------------------------------------------------------
-    @GetMapping(value = "/get-by-id/{id}")
+    @GetMapping(value = "/{id}")
     public ResponseEntity<Optional<PersonDTO>> getPersonById(@PathVariable Long id) {
         LOGGER.info("Getting person by id");
         return new ResponseEntity<>(checkIfIdExistsConvertToDto(id), HttpStatus.OK);
@@ -85,7 +85,7 @@ public class PersonController {
 //---------------------------------------------------------------------------------------------------------------------
     //make a rezervation with idperson and idproperty using update
 
-    @PutMapping(value = "/{idPerson}/property-reservations/{idProperty}")
+    @PutMapping(value = "/{idPerson}/reservations/{idProperty}")
     public ResponseEntity<Person> reservation(@PathVariable Long idPerson, @PathVariable Long idProperty, @RequestBody Person personCheck) {
         LOGGER.info("Updating a person to the property");
         Person person = reservationWithIdPersonIdProperty(idPerson, idProperty, personCheck);
@@ -93,7 +93,7 @@ public class PersonController {
     }
 //---------------------------------------------------------------------------------------------------------------------
 
-    @PutMapping(value = "/update-person/{id}")
+    @PutMapping(value = "/update/{id}")
     public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException, PersonNotFoundException {
         LOGGER.info("Updating a person using the id value");
         checkIFIdExists(id);
@@ -139,8 +139,6 @@ public class PersonController {
         Person person = personRepository.findById(idPerson).orElseThrow(() -> new IllegalStateException("This id" + idPerson + "was not found!"));
         Property property = propertyRepository.findById(idProperty).orElseThrow(() -> new IllegalStateException("This id" + idProperty + "was not found!"));
         person.assignProperty(property);
-        person.setCheckIn(personCheck.getCheckIn());//add check-in
-        person.setCheckOut(personCheck.getCheckOut());//add check-out
         return person;
     }
 

@@ -1,6 +1,7 @@
 package ro.itschool.Booking.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
@@ -35,10 +36,6 @@ public class Person implements UserDetails, ClonePerson {
     private String password;
 
 
-    private LocalDate checkIn;
-
-    private LocalDate checkOut;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -47,17 +44,24 @@ public class Person implements UserDetails, ClonePerson {
     private String mobileNumber;
     @JsonBackReference
     @ManyToOne
-    @JoinTable(name = "reservations")
+    @JoinColumn(name = "property_id")
     @ToString.Exclude
     private Property property;
 
+    @OneToMany(mappedBy = "person")
+    @ToString.Exclude
+    @JsonIgnore
+    private List<Reservation> reservations;
+    private boolean subscriber;
 
-    public Person(Long personId, String firstName, String lastName, String email, String mobileNumber) {
+
+    public Person(Long personId, String firstName, String lastName, String email, String mobileNumber,boolean subscriber) {
         this.personId = personId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = Objects.requireNonNull(email);
         this.mobileNumber = Objects.requireNonNull(mobileNumber);
+        this.subscriber=subscriber;
     }
 
     public Person(Person person) {
@@ -151,18 +155,12 @@ public class Person implements UserDetails, ClonePerson {
             return this;
         }
 
-        public PersonBuilder checkIn(LocalDate checkIn) {
-            this.person.checkIn = checkIn;
-            return this;
-        }
-
-        public PersonBuilder checkOut(LocalDate checkOut) {
-            this.person.checkOut = checkOut;
-            return this;
-        }
-
         public PersonBuilder role(Role role) {
             this.person.role = role;
+            return this;
+        }
+        public PersonBuilder subscriber(boolean subscriber){
+            this.person.subscriber=subscriber;
             return this;
         }
 
@@ -180,4 +178,5 @@ public class Person implements UserDetails, ClonePerson {
             return this.person;
         }
     }
+
 }

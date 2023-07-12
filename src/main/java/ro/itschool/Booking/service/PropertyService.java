@@ -2,12 +2,14 @@ package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
 import jakarta.el.PropertyNotFoundException;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import ro.itschool.Booking.DtoEntity.PropertyDTO;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
@@ -37,6 +40,8 @@ public class PropertyService {
         this.propertyRepository = propertyRepository;
     }
 
+    @Autowired
+    private EntityManager entityManager;
 
     public List<Property> getPropertiesByNameAndSortedAlphabetically(String name) {
         List<Property> properties = propertyRepository.getPropertyNameAndFilter(name).orElseThrow(() -> new RuntimeException("There no properties with this name"));
@@ -110,14 +115,15 @@ public class PropertyService {
     }
 
     //POST
-    public Property createProperty(Property property) {
-        Property save = null;
-        if (property == null) {
-            propertyEmailExistsCheck(property);
+    public Property createProperty(Property property_p) {
+        Property property = null;
+        if (property_p == null) {
+            propertyEmailExistsCheck(property_p);
+            property = property_p;
         } else {
-            save = propertyRepository.save(property);
+            property = property_p;
         }
-        return save;
+        return propertyRepository.save(property);
     }
 
     public Property createOrUpdateProperty(@NotNull Property property_p, @Nullable Long id) {
@@ -170,6 +176,14 @@ public class PropertyService {
         else {
             propertyRepository.deleteById(id);
         }
+    }
+
+    public Optional<PropertyDTO> checkIfIdExistsConvertToDto(Long id) {
+        Optional<Property> idExists = propertyRepository.findById(id);
+        if (idExists.isEmpty()) {
+            throw new IllegalStateException("This id " + id + " is not found");
+        }
+        return idExists.map(Property::toDTO);
     }
 
     public Optional<Property> findByPropertyEmail(String propertyEmail) {

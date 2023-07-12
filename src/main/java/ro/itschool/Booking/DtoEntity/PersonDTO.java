@@ -19,7 +19,7 @@ public class PersonDTO {
     private String lastName;
 
     private String email;
-
+    private boolean subscriber;
 
     private String mobileNumber;
 
@@ -31,6 +31,6 @@ public class PersonDTO {
     }
 
     public Person toEntity() {
-        return new Person(personId, firstName, lastName, email, mobileNumber);
+        return new Person(personId, firstName, lastName, email, mobileNumber, subscriber);
     }
 }

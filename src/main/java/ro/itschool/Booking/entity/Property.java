@@ -1,5 +1,6 @@
 package ro.itschool.Booking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +25,7 @@ public class Property implements CloneProperty {
 
     private String propertyName;
 
-
+    private Long price;
     private String propertyEmail;
 
     private String propertyLocation;
@@ -35,22 +36,28 @@ public class Property implements CloneProperty {
     @OneToMany(mappedBy = "property")
     @ToString.Exclude
     private List<Person> personList;
+    @OneToMany(mappedBy = "property")
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Reservation> reservations;
 
-    public Property(Long id, String propertyType, String propertyName, String propertyEmail, String propertyLocation, String propertyAddress) {
+    public Property(Long id, String propertyType, String propertyName, String propertyEmail, String propertyLocation, String propertyAddress, Long price) {
         this.id = id;
         this.propertyType = propertyType;
         this.propertyName = propertyName;
         this.propertyEmail = propertyEmail;
         this.propertyLocation = propertyLocation;
         this.propertyAddress = propertyAddress;
+        this.price = price;
     }
-    public Property(Property property){
+
+    public Property(Property property) {
 
     }
 
 
     public PropertyDTO toDTO() {
-        return new PropertyDTO(id, propertyType, propertyName, propertyLocation, propertyAddress, propertyEmail);
+        return new PropertyDTO(id, propertyType, propertyName, propertyLocation, propertyAddress, propertyEmail, price);
     }
 
     @Override
@@ -63,13 +70,15 @@ public class Property implements CloneProperty {
                 ", propertyLocation='" + propertyLocation + '\'' +
                 ", propertyAddress='" + propertyAddress + '\'' +
                 ", personList=" + personList +
+
                 '}';
     }
-    public static PropertyBuilder builder(){
+
+    public static PropertyBuilder builder() {
         return new PropertyBuilder();
     }
 
-//implement Prototype Design Pattern that clone objects
+    //implement Prototype Design Pattern that clone objects
     @Override
     public Property clone() {
         return new Property(this);
@@ -82,31 +91,38 @@ public class Property implements CloneProperty {
         private PropertyBuilder() {
             this.property = new Property();
         }
-        public PropertyBuilder id(Long id){
-            this.property.id=id;
+
+        public PropertyBuilder id(Long id) {
+            this.property.id = id;
             return this;
         }
-        public PropertyBuilder propertyType(String propertyType){
-            this.property.propertyType=propertyType;
+
+        public PropertyBuilder propertyType(String propertyType) {
+            this.property.propertyType = propertyType;
             return this;
         }
-        public PropertyBuilder propertyName(String propertyName){
-            this.property.propertyName=propertyName;
+
+        public PropertyBuilder propertyName(String propertyName) {
+            this.property.propertyName = propertyName;
             return this;
         }
-        public PropertyBuilder propertyEmail(String propertyEmail){
-            this.property.propertyEmail=propertyEmail;
+
+        public PropertyBuilder propertyEmail(String propertyEmail) {
+            this.property.propertyEmail = propertyEmail;
             return this;
         }
-        public PropertyBuilder propertyLocation(String propertyLocation){
-            this.property.propertyLocation=propertyLocation;
+
+        public PropertyBuilder propertyLocation(String propertyLocation) {
+            this.property.propertyLocation = propertyLocation;
             return this;
         }
-        public PropertyBuilder propertyAddress(String propertyAddress){
-            this.property.propertyAddress=propertyAddress;
+
+        public PropertyBuilder propertyAddress(String propertyAddress) {
+            this.property.propertyAddress = propertyAddress;
             return this;
         }
-        public Property build(){
+
+        public Property build() {
             return this.property;
         }
 

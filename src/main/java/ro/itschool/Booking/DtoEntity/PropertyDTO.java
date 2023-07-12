@@ -41,4 +41,7 @@ public class PropertyDTO {
         this.propertyEmail = propertyEmail;
     }
 
+    public PropertyDTO(Long id, String propertyType, String propertyName, String propertyLocation, String propertyAddress, String propertyEmail, Long price) {
+
+    }
 }

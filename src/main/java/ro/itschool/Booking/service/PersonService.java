@@ -1,6 +1,7 @@
 package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -23,7 +24,10 @@ import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
+import ro.itschool.Booking.entity.Property;
+import ro.itschool.Booking.entity.Role;
 import ro.itschool.Booking.repository.PersonRepository;
+import ro.itschool.Booking.repository.PropertyRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +40,10 @@ public class PersonService {
     private  PersonRepository personRepository;
     @Autowired
     private ModelMapper mapper;
+
+    @Autowired
+    private PropertyRepository propertyRepository;
+
 
     public PersonService(PersonRepository repository) {
     }
@@ -85,6 +93,7 @@ public class PersonService {
         checkEmailExists(person);
         checkToHaveSpecificCharacterInEmail(person);
         checkMobileNumber(person);
+        person.setRole(Role.ROLE_USER);
         return personRepository.save(person);
 
     }
@@ -238,5 +247,14 @@ public class PersonService {
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
         workbook.write(outputStream);
         outputStream.close();
+    }
+    public void updatePricesToAllProperties(List<Person> personList){
+        List<Property> allProperty = propertyRepository.findAll();
+        for (Property property:allProperty) {
+            property.setPrice(1485L);
+        }
+        //TODO create a logic that update prices to all properties and then send a mail to every person that is subscribed
+        //TODO create logic when just one property price is updated
+
     }
 }
