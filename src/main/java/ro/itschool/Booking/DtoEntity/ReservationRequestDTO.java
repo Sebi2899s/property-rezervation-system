@@ -7,6 +7,8 @@ public class ReservationRequestDTO {
     private String checkOut;
     private Long propertyId;
 
+    private Double price;
+
 
     public ReservationRequestDTO() {
     }
@@ -42,5 +44,13 @@ public class ReservationRequestDTO {
 
     public void setCheckOut(String checkOut) {
         this.checkOut = checkOut;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 }

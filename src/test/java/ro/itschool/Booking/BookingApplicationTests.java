@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 class BookingApplicationTests {
     @Autowired
     private PersonRepository personRepository;
-    // TODO make tests for repo and endpoints
 
     private static final Logger logger = Logger.getLogger(BookingApplicationTests.class.getName());
 

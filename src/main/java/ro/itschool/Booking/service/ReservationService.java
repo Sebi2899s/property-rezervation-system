@@ -10,7 +10,12 @@ import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
 import ro.itschool.Booking.repository.ReservationRepository;
 
+import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,43 +29,63 @@ public class ReservationService {
     @Autowired
     private PropertyService propertyService;
 
-    public Reservation saveOrUpdateReservation(@NotNull Person person, @Nullable Long id, @Nullable String checkIn, @Nullable String checkOut) throws IncorrectIdException {
-        Property property = new Property();
-        property=person.getProperty();
-        Reservation reservation =new Reservation();
-        if (id == null) {
-            reservation = Reservation.builder()
-                    .price(property.getPrice())
-                    .person(person)
-                    .property(property)
-                    .checkInDate(Date.valueOf(checkIn))
-                    .checkOutDate(Date.valueOf(checkOut))
-                    .build();
+    private final double TAX_ADDED = 1.2;
 
+    public void calculatePriceWithTax(@Nullable Long reservationId, String checkIn, String checkOut, Reservation reservation) throws IncorrectIdException {
+
+
+        if (reservationId == null) {
+            Double tax;
+            if (reservation.getPrice() == null) {
+                throw new RuntimeException("This reservation have no price!");
+            }
+
+            Long daysForReservation = findHowManyDaysAreInReservation(checkIn, checkOut);
+            Double totalPrice = daysForReservation * reservation.getPrice();
+            tax = TAX_ADDED * totalPrice;
+            reservation.setPrice(tax);
         } else {
-            reservation = getReservationById(id).get();
-            reservation.setPerson(person);
-            reservation.setPrice(person.getProperty().getPrice());
-            reservation.setProperty(person.getProperty());
-            reservation.setCheckInDate(Date.valueOf(checkIn));
-            reservation.setCheckOutDate(Date.valueOf(checkOut));
-            reservation = reservationRepository.save(reservation);
 
+            Reservation reservationById = getReservationById(reservationId).get();
+            double tax = 0L;
+            if (reservationById.getPrice() == null) {
+                throw new RuntimeException("This price is null, you need to add value!");
+            }
+            Long daysForReservation = findHowManyDaysAreInReservation(checkIn, checkOut);
+            Double totalPrice = daysForReservation * reservationById.getPrice();
+            tax = TAX_ADDED * totalPrice;
+            reservationById.setPrice(tax);
         }
-        return reservationRepository.save(reservation);
+
     }
 
-
-    public Reservation saveReservation(Long personId,Long propertyId, String checkIn, String checkOut){
+    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price) throws IncorrectIdException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
-        Date checkInDate =Date.valueOf(checkIn);
-        Date checkOutDate =Date.valueOf(checkOut);
+        DateTimeFormatter  formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
+        LocalDate checkInDate = LocalDate.parse(checkIn,formatter);
+        LocalDate checkOutDate = LocalDate.parse(checkOut,formatter);
         reservation.setCheckOutDate(checkOutDate);
         reservation.setCheckInDate(checkInDate);
         reservation.setProperty(property);
         reservation.setPerson(person);
+        reservation.setPrice(price);
+
+        calculatePriceWithTax(null, checkIn, checkOut, reservation);
+
+        return reservationRepository.save(reservation);
+    }
+
+    private static Long findHowManyDaysAreInReservation(String checkInDate, String checkOutDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
+        LocalDate checkInInfo = LocalDate.parse(checkInDate, formatter);
+        LocalDate checkOutInfo = LocalDate.parse(checkOutDate, formatter);
+        Long calculationByDay = ChronoUnit.DAYS.between(checkInInfo, checkOutInfo);
+        return calculationByDay;
+    }
+
+    public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
 

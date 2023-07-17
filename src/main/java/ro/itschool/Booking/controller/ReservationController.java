@@ -4,10 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.ReservationRequestDTO;
 import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
+import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
+import ro.itschool.Booking.service.PersonService;
+import ro.itschool.Booking.service.PropertyService;
 import ro.itschool.Booking.service.ReservationService;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +25,10 @@ public class ReservationController {
 
     @Autowired
     private ReservationService reservationService;
-
+    @Autowired
+    private PersonService personService;
+    @Autowired
+    private PropertyService propertyService;
     @GetMapping("/reservation/{id}")
     public Optional<Reservation> getReservationById(@RequestParam Long id) throws IncorrectIdException {
         return reservationService.getReservationById(id);
@@ -32,14 +42,21 @@ public class ReservationController {
         return allReservations;
     }
 
-    @PutMapping("/reservation/update")
-    public Reservation updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException {
-//        Person person = reservationRequestDTO.getPerson();
+    @PutMapping("/reservation/update/{reservationId}")
+    public Reservation updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO,@PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException {
+        Person person = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
+        Property property = propertyService.getPropertyOrThrow(reservationRequestDTO.getPropertyId());
         String checkIn = reservationRequestDTO.getCheckIn();
         String checkOut = reservationRequestDTO.getCheckOut();
-//        Long id = reservationRequestDTO.getId();
-//        return reservationService.saveOrUpdateReservation(person, id, checkIn, checkOut);
-        return null;
+        LocalDate checkInDate= LocalDate.parse(checkIn);
+        LocalDate checkOutDate= LocalDate.parse(checkOut);
+        Reservation reservation = new Reservation();
+        reservation.setPerson(person);
+        reservation.setProperty(property);
+        reservation.setCheckInDate(checkInDate);
+        reservation.setCheckOutDate(checkOutDate);
+        reservationService.calculatePriceWithTax(reservationId,checkIn,checkOut,reservation);
+        return reservationService.save(reservation);
     }
 
     @PostMapping("/reservation")
@@ -48,7 +65,9 @@ public class ReservationController {
         Long propertyId = reservationRequestDTO.getPropertyId();
         String checkIn = reservationRequestDTO.getCheckIn();
         String checkOut = reservationRequestDTO.getCheckOut();
-        return reservationService.saveReservation(personId, propertyId, checkIn, checkOut);
+        Double price = reservationRequestDTO.getPrice();
+
+        return reservationService.saveReservation(personId, propertyId, checkIn, checkOut,price);
     }
 
     @DeleteMapping("/reservation/delete/{id}")
