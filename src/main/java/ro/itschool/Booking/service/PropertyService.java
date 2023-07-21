@@ -96,9 +96,9 @@ public class PropertyService {
         HSSFSheet sheet = workbook.createSheet("List With Properties");
         HSSFRow row = sheet.createRow(0);
         row.createCell(0).setCellValue("ID");
-        row.createCell(0).setCellValue("Property Name");
-        row.createCell(0).setCellValue("Property Email");
-        row.createCell(0).setCellValue("Property Address");
+        row.createCell(1).setCellValue("Property Name");
+        row.createCell(2).setCellValue("Property Email");
+        row.createCell(3).setCellValue("Property Address");
 
         int dataRowIndex = 1;
         for (Property property : propertyList) {

@@ -1,5 +1,6 @@
 package ro.itschool.Booking.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.DtoEntity.ReservationRequestDTO;
@@ -12,6 +13,7 @@ import ro.itschool.Booking.service.PersonService;
 import ro.itschool.Booking.service.PropertyService;
 import ro.itschool.Booking.service.ReservationService;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -74,4 +76,18 @@ public class ReservationController {
     public String deleteReservation(Long id) throws IncorrectIdException {
         return reservationService.deleteReservation(id);
     }
+
+    @GetMapping(value = "/excel")
+    public void generateExcelReport(HttpServletResponse response) throws IOException {
+
+
+        response.setContentType("application");
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment;filename=reservations.xlsx";
+
+        response.setHeader(headerKey, headerValue);
+        reservationService.generateExcel(response);
+    }
+
 }

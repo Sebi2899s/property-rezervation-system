@@ -1,7 +1,11 @@
 package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.customException.IncorrectIdException;
@@ -10,12 +14,10 @@ import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
 import ro.itschool.Booking.repository.ReservationRepository;
 
-import java.math.BigDecimal;
-import java.sql.Date;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,9 +65,9 @@ public class ReservationService {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
-        DateTimeFormatter  formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
-        LocalDate checkInDate = LocalDate.parse(checkIn,formatter);
-        LocalDate checkOutDate = LocalDate.parse(checkOut,formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
+        LocalDate checkInDate = LocalDate.parse(checkIn, formatter);
+        LocalDate checkOutDate = LocalDate.parse(checkOut, formatter);
         reservation.setCheckOutDate(checkOutDate);
         reservation.setCheckInDate(checkInDate);
         reservation.setProperty(property);
@@ -105,5 +107,57 @@ public class ReservationService {
 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
+        List<Reservation> reservationList = reservationRepository.findAll();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("List With Reservations");
+        HSSFRow row = sheet.createRow(0);
+        row.createCell(0).setCellValue("ID");
+        row.createCell(1).setCellValue("Check-In");
+        row.createCell(2).setCellValue("Check-Out");
+        row.createCell(3).setCellValue("Price");
+        row.createCell(4).setCellValue("Person");
+        row.createCell(5).setCellValue("Property");
+
+        int dataRowIndex = 1;
+        for (Reservation reservation : reservationList) {
+            HSSFRow dataRow = sheet.createRow(dataRowIndex);
+            verificationForReservationFieldsAndGiveDefaultValue(reservation);
+            try {
+                dataRow.createCell(0).setCellValue(reservation.getId());
+                dataRow.createCell(1).setCellValue(reservation.getCheckInDate());
+                dataRow.createCell(2).setCellValue(reservation.getCheckOutDate());
+                dataRow.createCell(3).setCellValue(reservation.getPrice());
+                dataRow.createCell(4).setCellValue(reservation.getPerson().getFirstName() + " " + reservation.getPerson().getLastName());
+                dataRow.createCell(5).setCellValue(reservation.getProperty().getPropertyName());
+                if (reservation.getPerson() == null || reservation.getProperty() == null) {
+                    throw new RuntimeException("The reservation with id" + reservation.getId() + "is not valid!");
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+            dataRowIndex++;
+        }
+        ServletOutputStream outputStream = httpServletResponse.getOutputStream();
+        workbook.write(outputStream);
+        outputStream.close();
+    }
+
+    private static void verificationForReservationFieldsAndGiveDefaultValue(Reservation reservation) {
+        if (reservation.getCheckInDate() == null) {
+            reservation.setCheckInDate(LocalDate.of(2020, 01, 01));
+        }
+        if (reservation.getCheckOutDate() == null) {
+            reservation.setCheckOutDate(LocalDate.of(2020, 01, 02));
+        }
+        if (reservation.getPrice() == null) {
+            reservation.setPrice(10.5);
+        }
+
     }
 }

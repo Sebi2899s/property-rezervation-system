@@ -231,9 +231,9 @@ public class PersonService {
         HSSFSheet sheet = workbook.createSheet("List With Persons");
         HSSFRow row = sheet.createRow(0);
         row.createCell(0).setCellValue("ID");
-        row.createCell(0).setCellValue("First Name");
-        row.createCell(0).setCellValue("Last Name");
-        row.createCell(0).setCellValue("Email");
+        row.createCell(1).setCellValue("First Name");
+        row.createCell(2).setCellValue("Last Name");
+        row.createCell(3).setCellValue("Email");
 
         int dataRowIndex = 1;
         for (Person person : personList) {
