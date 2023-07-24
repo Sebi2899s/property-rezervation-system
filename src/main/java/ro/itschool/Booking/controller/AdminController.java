@@ -88,21 +88,21 @@ public class AdminController {
     private void checkPropertyIdExists(Long id) throws IncorrectIdException {
         Optional<Property> findById = propertyService.findById(id);
         if (findById.isEmpty()) {
-            throw new IncorrectIdException("This id doesn't exists!");
+            throw new IncorrectIdException("This id " + id + " doesn't exists!");
         }
     }
 
     private void checkEmailPersonExists(Person person) throws IncorretNameException {
         Optional<Person> checkEmail = personService.findByEmail(person.getEmail());
         if (checkEmail.isPresent()) {
-            throw new IncorretNameException("This email already exists!");
+            throw new IncorretNameException("This email: " + person.getEmail() + " already exists!");
         }
     }
 
     private void checkIfEmailPropertyExists(Property property) throws IncorretNameException {
         Optional<Property> checkEmail = propertyService.findByPropertyEmail(property.getPropertyEmail());
         if (checkEmail.isPresent()) {
-            throw new IncorretNameException("This email was already taken!");
+            throw new IncorretNameException("This email: " + property.getPropertyEmail() + " already exists!");
         }
     }
 
