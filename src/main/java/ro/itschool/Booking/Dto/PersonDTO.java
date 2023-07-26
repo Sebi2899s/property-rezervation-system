@@ -1,12 +1,9 @@
-package ro.itschool.Booking.DtoEntity;
+package ro.itschool.Booking.Dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ro.itschool.Booking.entity.Person;
-
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor

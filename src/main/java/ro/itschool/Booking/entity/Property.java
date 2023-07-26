@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-import ro.itschool.Booking.DtoEntity.PropertyDTO;
+import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.util.CloneProperty;
 
 import java.util.List;

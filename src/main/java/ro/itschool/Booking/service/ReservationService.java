@@ -9,6 +9,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.entity.Coupon;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
@@ -29,42 +30,18 @@ public class ReservationService {
     @Autowired
     private PersonService personService;
     @Autowired
+    private CouponService couponService;
+    @Autowired
     private PropertyService propertyService;
 
-    private final double TAX_ADDED = 1.2;
-
-    public void calculatePriceWithTax(@Nullable Long reservationId, String checkIn, String checkOut, Reservation reservation) throws IncorrectIdException {
+    private final double TAX_ADDED = 2.5;
 
 
-        if (reservationId == null) {
-            Double tax;
-            if (reservation.getPrice() == null) {
-                throw new RuntimeException("This reservation have no price!");
-            }
-
-            Long daysForReservation = findHowManyDaysAreInReservation(checkIn, checkOut);
-            Double totalPrice = daysForReservation * reservation.getPrice();
-            tax = TAX_ADDED * totalPrice;
-            reservation.setPrice(tax);
-        } else {
-
-            Reservation reservationById = getReservationById(reservationId).get();
-            double tax = 0L;
-            if (reservationById.getPrice() == null) {
-                throw new RuntimeException("This price is null, you need to add value!");
-            }
-            Long daysForReservation = findHowManyDaysAreInReservation(checkIn, checkOut);
-            Double totalPrice = daysForReservation * reservationById.getPrice();
-            tax = TAX_ADDED * totalPrice;
-            reservationById.setPrice(tax);
-        }
-
-    }
-
-    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price) throws IncorrectIdException {
+    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, Long couponId, String country) throws IncorrectIdException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
+        Coupon coupon = couponService.getCoupon(couponId);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
         LocalDate checkInDate = LocalDate.parse(checkIn, formatter);
         LocalDate checkOutDate = LocalDate.parse(checkOut, formatter);
@@ -73,19 +50,43 @@ public class ReservationService {
         reservation.setProperty(property);
         reservation.setPerson(person);
         reservation.setPrice(price);
+        reservation.setCoupon(coupon);
+        reservation.setCountry(country);
 
-        calculatePriceWithTax(null, checkIn, checkOut, reservation);
+        calculatePriceWithTax(null, checkIn, checkOut, reservation, coupon);
 
         return reservationRepository.save(reservation);
     }
+    public void calculatePriceWithTax(@Nullable Long reservationId, String checkIn, String checkOut, Reservation reservation, Coupon coupon) throws IncorrectIdException {
 
-    private static Long findHowManyDaysAreInReservation(String checkInDate, String checkOutDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
-        LocalDate checkInInfo = LocalDate.parse(checkInDate, formatter);
-        LocalDate checkOutInfo = LocalDate.parse(checkOutDate, formatter);
-        Long calculationByDay = ChronoUnit.DAYS.between(checkInInfo, checkOutInfo);
-        return calculationByDay;
+        //first situation is when i don't have a reservation
+        if (reservationId == null) {
+            if (reservation.getPrice() == null) {
+                throw new RuntimeException("This reservation have no price!");
+            }
+            Long daysForReservation = findHowManyDaysAreInReservation(checkIn, checkOut);
+            Double totalPriceWithoutTax = daysForReservation * reservation.getPrice();
+
+            //if cupon is active will be calculated in it, if isn't the price will be calculated without discount
+            verificationIfCouponIsActiveAndCalculatePrice(reservation, coupon, totalPriceWithoutTax);
+
+        } else {
+
+            //this situation is when i have already a resevation and i wanted to update the price
+            Reservation reservationById = getReservationById(reservationId).get();
+            if (reservationById.getPrice() == null) {
+                throw new RuntimeException("This reservation have no price!");
+            }
+            Long daysForReservation = findHowManyDaysAreInReservation(checkIn, checkOut);
+            Double totalPriceWithoutTax = daysForReservation * reservationById.getPrice();
+
+            //if coupon is active will be calculated in it, if isn't the price will be calculated without discount
+            verificationIfCouponIsActiveAndCalculatePrice(reservation, coupon, totalPriceWithoutTax);
+        }
+
     }
+
+
 
     public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
@@ -120,6 +121,7 @@ public class ReservationService {
         row.createCell(3).setCellValue("Price");
         row.createCell(4).setCellValue("Person");
         row.createCell(5).setCellValue("Property");
+        row.createCell(6).setCellValue("Coupon");
 
         int dataRowIndex = 1;
         for (Reservation reservation : reservationList) {
@@ -132,6 +134,7 @@ public class ReservationService {
                 dataRow.createCell(3).setCellValue(reservation.getPrice());
                 dataRow.createCell(4).setCellValue(reservation.getPerson().getFirstName() + " " + reservation.getPerson().getLastName());
                 dataRow.createCell(5).setCellValue(reservation.getProperty().getPropertyName());
+                dataRow.createCell(6).setCellValue(reservation.getCoupon().getCode());
                 if (reservation.getPerson() == null || reservation.getProperty() == null) {
                     throw new RuntimeException("The reservation with id" + reservation.getId() + "is not valid!");
                 }
@@ -160,4 +163,35 @@ public class ReservationService {
         }
 
     }
+    private static Long findHowManyDaysAreInReservation(String checkInDate, String checkOutDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
+        LocalDate checkInInfo = LocalDate.parse(checkInDate, formatter);
+        LocalDate checkOutInfo = LocalDate.parse(checkOutDate, formatter);
+        Long calculationByDay = ChronoUnit.DAYS.between(checkInInfo, checkOutInfo);
+        return calculationByDay;
+    }
+
+    private static Double getValuePercentageOfDiscount(Coupon coupon) {
+        Double couponDiscount = coupon.getDiscount();
+        double finalValue = couponDiscount / 100;
+        return finalValue;
+    }
+    private void verificationIfCouponIsActiveAndCalculatePrice(Reservation reservation, Coupon coupon, Double totalPrice) {
+        double finalPrice;
+        if (coupon.isActivCoupon()) {
+            //getValuePercentageOfDiscount this method return the discount value
+            Double couponDiscount = getValuePercentageOfDiscount(coupon);
+
+            //calculate the price with tax
+            finalPrice = totalPrice-((TAX_ADDED/100) * totalPrice);
+
+            //calculate the price with discount if exists
+            finalPrice = finalPrice - (finalPrice * couponDiscount);
+            reservation.setPrice(finalPrice);
+        } else {
+            finalPrice = totalPrice-((TAX_ADDED/100) * totalPrice);
+            reservation.setPrice(finalPrice);
+        }
+    }
+
 }

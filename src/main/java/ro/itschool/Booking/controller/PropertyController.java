@@ -1,30 +1,19 @@
 package ro.itschool.Booking.controller;
 
 import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.core.service.GenericResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import ro.itschool.Booking.DtoEntity.PersonDTO;
-import ro.itschool.Booking.DtoEntity.PropertyDTO;
+import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.convertorDTO.PropertyConvertor;
-import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
-import ro.itschool.Booking.customException.IncorrectIdException;
-import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PropertyService;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;

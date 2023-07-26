@@ -1,7 +1,6 @@
 package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -10,15 +9,12 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
-import ro.itschool.Booking.DtoEntity.PersonDTO;
+import ro.itschool.Booking.Dto.PersonDTO;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
@@ -204,23 +200,6 @@ public class PersonService {
 
     }
 
-//---------------------------------------------------------------------------------------------------------------------
-
-//    public List<PersonDTO> searchByFirstNameAndOrLastName(String firstName,
-//                                                          String lastName,
-//                                                          Integer pageNo,
-//                                                          Integer pageSize,
-//                                                          String sortBy) {
-//        List<Person> personList = new ArrayList<>();
-//        List<PersonDTO> personDTOList = new ArrayList<>();
-//        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName, pageNo, pageSize));
-//        for (Person person : personList) {
-//            PersonDTO personDTO = mapper.map(person, PersonDTO.class);
-//            personDTOList.add(personDTO);
-//        }
-//        return personDTOList;
-//
-//    }
 
 
     // generate EXCEL
@@ -247,14 +226,5 @@ public class PersonService {
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
         workbook.write(outputStream);
         outputStream.close();
-    }
-    public void updatePricesToAllProperties(List<Person> personList){
-        List<Property> allProperty = propertyRepository.findAll();
-        for (Property property:allProperty) {
-            property.setPrice(1485L);
-        }
-        //TODO create a logic that update prices to all properties and then send a mail to every person that is subscribed
-        //TODO create logic when just one property price is updated
-
     }
 }

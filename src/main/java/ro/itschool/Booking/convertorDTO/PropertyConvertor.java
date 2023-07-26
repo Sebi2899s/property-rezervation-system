@@ -1,7 +1,7 @@
 package ro.itschool.Booking.convertorDTO;
 
 import org.springframework.stereotype.Service;
-import ro.itschool.Booking.DtoEntity.PropertyDTO;
+import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.entity.Property;
 
 import java.util.List;
