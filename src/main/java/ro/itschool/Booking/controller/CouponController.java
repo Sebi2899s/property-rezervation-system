@@ -14,7 +14,7 @@ public class CouponController {
     private CouponService couponService;
 
     @GetMapping(value = "/coupon/{id}")
-    public Coupon getCouponById(@RequestParam Long id) {
+    public Coupon getCouponById(@RequestParam Long id) throws Exception {
         return couponService.getCoupon(id);
     }
 
@@ -26,6 +26,16 @@ public class CouponController {
         double discount = couponRq.getDiscount();
         boolean isActive = couponRq.isActivCoupon();
         return couponService.save(code,validFrom,validTo,discount,isActive);
+    }
+
+    @PutMapping(value = "/update/{id}")
+    public Coupon updateCoupon(@PathVariable Long id,@RequestBody CouponRequestDTO couponRq) throws Exception {
+        String code = couponRq.getCode();
+        String validFrom = couponRq.getValidFrom();
+        String validTo = couponRq.getValidTo();
+        double discount = couponRq.getDiscount();
+        boolean isActive = couponRq.isActivCoupon();
+        return couponService.update(id,code,validFrom,validTo,discount,isActive);
     }
 
     @DeleteMapping(value = "/coupon/{id}")
