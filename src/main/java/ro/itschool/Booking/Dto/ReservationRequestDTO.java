@@ -18,6 +18,7 @@ public class ReservationRequestDTO {
     private String country;
 
     private Double price;
+    private String description;
 
 
 }

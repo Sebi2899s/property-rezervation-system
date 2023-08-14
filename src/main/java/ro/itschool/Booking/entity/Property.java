@@ -25,12 +25,13 @@ public class Property implements CloneProperty {
 
     private String propertyName;
 
-    private Long price;
+    private Double price;
     private String propertyEmail;
 
     private String propertyLocation;
 
     private String propertyAddress;
+    private String description;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "property")
@@ -41,7 +42,7 @@ public class Property implements CloneProperty {
     @ToString.Exclude
     private List<Reservation> reservations;
 
-    public Property(Long id, String propertyType, String propertyName, String propertyEmail, String propertyLocation, String propertyAddress, Long price) {
+    public Property(Long id, String propertyType, String propertyName, String propertyEmail, String propertyLocation, String propertyAddress, Double price,String description) {
         this.id = id;
         this.propertyType = propertyType;
         this.propertyName = propertyName;
@@ -49,6 +50,7 @@ public class Property implements CloneProperty {
         this.propertyLocation = propertyLocation;
         this.propertyAddress = propertyAddress;
         this.price = price;
+        this.description=description;
     }
 
     public Property(Property property) {
@@ -57,7 +59,7 @@ public class Property implements CloneProperty {
 
 
     public PropertyDTO toDTO() {
-        return new PropertyDTO(id, propertyType, propertyName, propertyLocation, propertyAddress, propertyEmail, price);
+        return new PropertyDTO(id, propertyType, propertyName, propertyLocation, propertyAddress, propertyEmail, price,description);
     }
 
     @Override

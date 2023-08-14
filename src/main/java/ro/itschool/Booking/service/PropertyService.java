@@ -95,6 +95,8 @@ public class PropertyService {
         row.createCell(1).setCellValue("Property Name");
         row.createCell(2).setCellValue("Property Email");
         row.createCell(3).setCellValue("Property Address");
+        row.createCell(4).setCellValue("Price");
+        row.createCell(5).setCellValue("Description");
 
         int dataRowIndex = 1;
         for (Property property : propertyList) {
@@ -103,6 +105,8 @@ public class PropertyService {
             dataRow.createCell(1).setCellValue(property.getPropertyName());
             dataRow.createCell(2).setCellValue(property.getPropertyEmail());
             dataRow.createCell(3).setCellValue(property.getPropertyAddress());
+            dataRow.createCell(4).setCellValue(property.getPrice());
+            dataRow.createCell(5).setCellValue(property.getDescription());
             dataRowIndex++;
         }
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
@@ -162,6 +166,8 @@ public class PropertyService {
         propertyUpdate.setPropertyLocation(property.getPropertyLocation());
         propertyUpdate.setPropertyAddress(property.getPropertyAddress());
         propertyUpdate.setPropertyType(property.getPropertyType());
+        propertyUpdate.setPrice(property.getPrice());
+        propertyUpdate.setDescription(property.getDescription());
     }
 
     //DELETE

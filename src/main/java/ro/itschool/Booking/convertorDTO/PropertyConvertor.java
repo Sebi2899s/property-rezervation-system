@@ -17,6 +17,7 @@ public class PropertyConvertor {
         propertyDTO.setPropertyName(property.getPropertyName());
         propertyDTO.setPropertyAddress(property.getPropertyAddress());
         propertyDTO.setPropertyLocation(property.getPropertyLocation());
+        propertyDTO.setPropertyEmail(property.getPropertyEmail());
 
         return propertyDTO;
 
