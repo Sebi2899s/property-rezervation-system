@@ -47,5 +47,10 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_GATEWAY);
     }
+    @ExceptionHandler(FieldValueException.class)
+    public ResponseEntity<ErrorDetails> handleFieldValueEx(FieldValueException e, WebRequest request){
+        ErrorDetails errorDetails = new ErrorDetails(new Date(),e.getMessage(),request.getDescription(false));
+        return new ResponseEntity<>(errorDetails,HttpStatus.BAD_REQUEST);
+    }
 
 }

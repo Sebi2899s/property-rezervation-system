@@ -10,6 +10,7 @@ import ro.itschool.Booking.entity.Coupon;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
+import ro.itschool.Booking.repository.impl.ReservationImpl;
 import ro.itschool.Booking.service.CouponService;
 import ro.itschool.Booking.service.PersonService;
 import ro.itschool.Booking.service.PropertyService;
@@ -28,11 +29,7 @@ public class ReservationController {
     @Autowired
     private ReservationService reservationService;
     @Autowired
-    private CouponService couponService;
-    @Autowired
-    private PersonService personService;
-    @Autowired
-    private PropertyService propertyService;
+    private ReservationImpl reservationImpl;
 
     @GetMapping("/reservation/{id}")
     public Optional<Reservation> getReservationById(@RequestParam Long id) throws IncorrectIdException {
@@ -49,34 +46,15 @@ public class ReservationController {
 
     @PutMapping("/reservation/update/{reservationId}")
     public Reservation updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException {
-        Person person = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
-        Property property = propertyService.getPropertyOrThrow(reservationRequestDTO.getPropertyId());
-        Coupon coupon = couponService.getCoupon(reservationRequestDTO.getCouponId());
-        String checkIn = reservationRequestDTO.getCheckIn();
-        String checkOut = reservationRequestDTO.getCheckOut();
-        LocalDate checkInDate = LocalDate.parse(checkIn);
-        LocalDate checkOutDate = LocalDate.parse(checkOut);
-        Reservation reservation = new Reservation();
-        reservation.setPerson(person);
-        reservation.setProperty(property);
-        reservation.setCheckInDate(checkInDate);
-        reservation.setCheckOutDate(checkOutDate);
-        reservation.setCoupon(coupon);
-        reservationService.calculatePriceWithTax(reservationId, checkIn, checkOut, reservation, coupon);
-        return reservationService.save(reservation);
+
+        return reservationImpl.updateOrSaveReservation(reservationRequestDTO,reservationId);
     }
 
     @PostMapping("/reservation")
     public Reservation saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException {
-        Long personId = reservationRequestDTO.getPersonId();
-        Long propertyId = reservationRequestDTO.getPropertyId();
-        String checkIn = reservationRequestDTO.getCheckIn();
-        String checkOut = reservationRequestDTO.getCheckOut();
-        Double price = reservationRequestDTO.getPrice();
-        Long couponId = reservationRequestDTO.getCouponId();
-        String country=reservationRequestDTO.getCountry();
 
-        return reservationService.saveReservation(personId, propertyId, checkIn, checkOut, price, couponId,country);
+
+        return reservationImpl.updateOrSaveReservation(reservationRequestDTO, null);
     }
 
     @DeleteMapping("/reservation/delete/{id}")
