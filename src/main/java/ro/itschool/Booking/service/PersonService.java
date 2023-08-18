@@ -95,27 +95,6 @@ public class PersonService {
     }
 
 
-    //---------------------------------------------------------------------------------------------------------------------
-    public Person createOrUpdatePerson(@NotNull Person person_p, @Nullable Long id) throws PersonNotFoundException {
-        Person person;
-        String sMessage = null;
-        //update case
-        if (id != null) {
-            person = getPersonOrThrow(id);
-            sMessage = "Its an error with updating a person";
-
-        } else {
-            person_p.setPersonId(null);
-            sMessage = "Its an error with saving a person";
-        }
-        try {
-
-            person = savePerson(person_p);
-        } catch (Exception e) {
-            throw new RuntimeException(sMessage);
-        }
-        return person;
-    }
 
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -227,6 +206,8 @@ public class PersonService {
         workbook.write(outputStream);
         outputStream.close();
     }
+
+ //---------------------------------------------------------------------------------------------------------------------
     public Person updateOrSavePerson(Person personRequest, Long personId) throws MobileNumberException, IncorretNameException {
         if (personId == null){
             return savePerson(personRequest);

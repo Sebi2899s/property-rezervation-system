@@ -36,15 +36,17 @@ public class PropertyService {
         this.propertyRepository = propertyRepository;
     }
 
-    @Autowired
-    private EntityManager entityManager;
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public List<Property> getPropertiesByNameAndSortedAlphabetically(String name) {
         List<Property> properties = propertyRepository.getPropertyNameAndFilter(name).orElseThrow(() -> new RuntimeException("There no properties with this name"));
         properties.sort(Comparator.comparing(Property::getPropertyName));
         return properties;
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //GET
     public List<Property> getAllProperties(Integer pageNo,
                                            Integer pageSize,
@@ -59,6 +61,8 @@ public class PropertyService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //GET by property name
     public List<Property> getByPropertyName(String propertyName) throws IncorretNameException {
         if (propertyName == null) {
@@ -67,24 +71,31 @@ public class PropertyService {
             return propertyRepository.findByPropertyName(propertyName);
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Property getPropertyOrThrow(Long id) {
         Optional<Property> property = findById(id);
         return property.orElseThrow(() -> new PropertyNotFoundException("Property with this id" + id + "was not found!"));
     }
 
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     //get property by property type using query specification
     public List<Property> getPropertyByPropertyType(String propertyTipe) {
         Specification<Property> propertySpecification = Specifications.getPropertyByPropertyType(propertyTipe);
         return propertyRepository.findAll(propertySpecification);
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //get property where person have the following first name
     public List<Property> getPropertyByPersonFirstName(String firstName) {
         Specification<Property> specifications = Specifications.getPropertyByPersonFirstName(firstName);
         return propertyRepository.findAll(specifications);
     }
 
-
+    //---------------------------------------------------------------------------------------------------------------------
     //excel file report of all persons
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
         List<Property> propertyList = propertyRepository.findAll();
@@ -114,6 +125,9 @@ public class PropertyService {
         outputStream.close();
     }
 
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     //POST
     public Property createProperty(Property property_p) {
         Property property = null;
@@ -126,25 +140,8 @@ public class PropertyService {
         return propertyRepository.save(property);
     }
 
-    public Property createOrUpdateProperty(@NotNull Property property_p, @Nullable Long id) {
-        Property property;
-        String sMessage = null;
-        //update case
-        if (id != null) {
-            property = getPropertyOrThrow(id);
-            sMessage = "Error in updating property";
-        } else {
-            property_p.setId(null);
-            sMessage = "Error in saving property";
-        }
-        try {
 
-            property = createProperty(property_p);
-        } catch (Exception e) {
-            throw new RuntimeException(sMessage);
-        }
-        return property;
-    }
+ //---------------------------------------------------------------------------------------------------------------------
     public Property updateOrSaveProperty(@NotNull Property propertyRequest, @Nullable Long propertyId) {
         if (propertyId==null){
             return createProperty(propertyRequest);
@@ -165,6 +162,9 @@ public class PropertyService {
         }
     }
 
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     //method that check if email exists
     private void propertyEmailExistsCheck(Property property) {
         Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
@@ -173,6 +173,8 @@ public class PropertyService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //UPDATE
     public void updateProperty(Long id, Property property) throws IncorrectIdException {
         Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + property.getId() + "is not found! "));
@@ -188,6 +190,8 @@ public class PropertyService {
         propertyUpdate.setDescription(property.getDescription());
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //DELETE
     public void deleteProperty(Long id) {
         Optional<Property> person = propertyRepository.findById(id);
@@ -198,6 +202,8 @@ public class PropertyService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Optional<PropertyDTO> checkIfIdExistsConvertToDto(Long id) {
         Optional<Property> idExists = propertyRepository.findById(id);
         if (idExists.isEmpty()) {
@@ -206,10 +212,15 @@ public class PropertyService {
         return idExists.map(Property::toDTO);
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Optional<Property> findByPropertyEmail(String propertyEmail) {
         return propertyRepository.findByPropertyEmail(propertyEmail);
     }
 
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Optional<Property> findById(Long id) {
         return propertyRepository.findById(id);
     }

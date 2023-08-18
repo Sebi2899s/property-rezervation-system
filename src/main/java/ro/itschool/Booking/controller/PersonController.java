@@ -10,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.Dto.PersonDTO;
 import ro.itschool.Booking.convertorDTO.PersonConvertor;
+import ro.itschool.Booking.customException.IncorretNameException;
+import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
@@ -71,10 +73,10 @@ public class PersonController {
 //---------------------------------------------------------------------------------------------------------------------
 
     @PostMapping(value = "/save")
-    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws PersonNotFoundException {
+    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
         LOGGER.info("Saving a person");
         PersonConvertor personConvertor = new PersonConvertor();
-        personService.createOrUpdatePerson(person, null);
+        personService.updateOrSavePerson(person, null);
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }
 
@@ -91,10 +93,10 @@ public class PersonController {
 //---------------------------------------------------------------------------------------------------------------------
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException, PersonNotFoundException {
+    public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException, MobileNumberException, IncorretNameException {
         LOGGER.info("Updating a person using the id value");
         checkIFIdExists(id);
-        personService.createOrUpdatePerson(person, id);
+        personService.updateOrSavePerson(person, id);
         PersonConvertor personConvertor = new PersonConvertor();
         return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
     }

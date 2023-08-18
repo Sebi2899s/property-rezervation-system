@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ReservationService  {
+public class ReservationService {
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -45,7 +45,7 @@ public class ReservationService  {
 
     private final double TAX_ADDED = 2.5;
 
-
+    //---------------------------------------------------------------------------------------------------------------------
     public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, Long couponId, String country) throws IncorrectIdException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
@@ -66,6 +66,9 @@ public class ReservationService  {
 
         return reservationRepository.save(reservation);
     }
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     public void calculatePriceWithTax(@Nullable Long reservationId, String checkIn, String checkOut, Reservation reservation, Coupon coupon) throws IncorrectIdException {
 
         //first situation is when i don't have a reservation
@@ -95,6 +98,8 @@ public class ReservationService  {
 
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
 
         if (reservationId != null) {
@@ -150,9 +155,15 @@ public class ReservationService  {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
+
     public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
+
+
+    //---------------------------------------------------------------------------------------------------------------------
 
     public Optional<Reservation> getReservationById(Long id) throws IncorrectIdException {
         Optional<Reservation> getReservation = reservationRepository.findById(id);
@@ -160,20 +171,33 @@ public class ReservationService  {
         return getReservation;
     }
 
+    //---------------------------------------------------------------------------------------------------------------------
+
     public String deleteReservation(Long id) throws IncorrectIdException {
-        if (id.equals(null)) {
+        if (id == null) {
             throw new IncorrectIdException("This is id:" + id + " was not found!");
         }
         reservationRepository.deleteById(id);
         return "Reservation with id:" + id + " was deleted";
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
+
     public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+
+        List<Reservation> allReservation = reservationRepository.findAll();
+        if (allReservation == null) {
+            return new ArrayList<>();
+        } else {
+            return allReservation;
+        }
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
     public List<Reservation> getAllReservationForAdmin(Integer pageNo,
-                                           Integer pageSize,
-                                           String sortBy) {
+                                                       Integer pageSize,
+                                                       String sortBy) {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 
         Page<Reservation> pagedResult = reservationRepository.findAll(paging);
@@ -183,6 +207,8 @@ public class ReservationService  {
             return new ArrayList<Reservation>();
         }
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
 
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
         List<Reservation> reservationList = reservationRepository.findAll();
@@ -225,6 +251,8 @@ public class ReservationService  {
         outputStream.close();
     }
 
+    //---------------------------------------------------------------------------------------------------------------------
+
     private static void verificationForReservationFieldsAndGiveDefaultValue(Reservation reservation) {
         if (reservation.getCheckInDate() == null) {
             reservation.setCheckInDate(LocalDate.of(2020, 01, 01));
@@ -237,6 +265,8 @@ public class ReservationService  {
         }
 
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
     private static Long findHowManyDaysAreInReservation(String checkInDate, String checkOutDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
         LocalDate checkInInfo = LocalDate.parse(checkInDate, formatter);
@@ -245,11 +275,16 @@ public class ReservationService  {
         return calculationByDay;
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
+
     private static Double getValuePercentageOfDiscount(Coupon coupon) {
         Double couponDiscount = coupon.getDiscount();
         double finalValue = couponDiscount / 100;
         return finalValue;
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
     private void verificationIfCouponIsActiveAndCalculatePrice(Reservation reservation, Coupon coupon, Double totalPrice) {
         double finalPrice;
         if (coupon.isActivCoupon()) {
@@ -257,15 +292,16 @@ public class ReservationService  {
             Double couponDiscount = getValuePercentageOfDiscount(coupon);
 
             //calculate the price with tax
-            finalPrice = totalPrice-((TAX_ADDED/100) * totalPrice);
+            finalPrice = totalPrice - ((TAX_ADDED / 100) * totalPrice);
 
             //calculate the price with discount if exists
             finalPrice = finalPrice - (finalPrice * couponDiscount);
             reservation.setPrice(finalPrice);
         } else {
-            finalPrice = totalPrice-((TAX_ADDED/100) * totalPrice);
+            finalPrice = totalPrice - ((TAX_ADDED / 100) * totalPrice);
             reservation.setPrice(finalPrice);
         }
     }
+    //---------------------------------------------------------------------------------------------------------------------
 
 }
