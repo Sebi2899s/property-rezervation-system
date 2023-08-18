@@ -145,7 +145,25 @@ public class PropertyService {
         }
         return property;
     }
-
+    public Property updateOrSaveProperty(@NotNull Property propertyRequest, @Nullable Long propertyId) {
+        if (propertyId==null){
+            return createProperty(propertyRequest);
+        }else {
+            Property property = findById(propertyId).get();
+            if (property!=null){
+                property.setPropertyName(propertyRequest.getPropertyName());
+                property.setPropertyLocation(propertyRequest.getPropertyLocation());
+                property.setPropertyAddress(propertyRequest.getPropertyAddress());
+                property.setPropertyType(propertyRequest.getPropertyType());
+                property.setDescription(propertyRequest.getDescription());
+                property.setPropertyLocation(propertyRequest.getPropertyLocation());
+                property.setPrice(propertyRequest.getPrice());
+                property.setPersonList(propertyRequest.getPersonList());
+                property.setReservations(propertyRequest.getReservations());
+            }
+            return createProperty(property);
+        }
+    }
 
     //method that check if email exists
     private void propertyEmailExistsCheck(Property property) {

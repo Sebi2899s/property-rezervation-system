@@ -4,16 +4,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.Dto.ReservationRequestDTO;
+import ro.itschool.Booking.customException.FieldValueException;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.PersonNotFoundException;
-import ro.itschool.Booking.entity.Coupon;
-import ro.itschool.Booking.entity.Person;
-import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
-import ro.itschool.Booking.repository.impl.ReservationImpl;
-import ro.itschool.Booking.service.CouponService;
-import ro.itschool.Booking.service.PersonService;
-import ro.itschool.Booking.service.PropertyService;
 import ro.itschool.Booking.service.ReservationService;
 
 import java.io.IOException;
@@ -28,8 +22,6 @@ public class ReservationController {
 
     @Autowired
     private ReservationService reservationService;
-    @Autowired
-    private ReservationImpl reservationImpl;
 
     @GetMapping("/reservation/{id}")
     public Optional<Reservation> getReservationById(@RequestParam Long id) throws IncorrectIdException {
@@ -45,16 +37,16 @@ public class ReservationController {
     }
 
     @PutMapping("/reservation/update/{reservationId}")
-    public Reservation updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException {
+    public Reservation updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException, FieldValueException {
 
-        return reservationImpl.updateOrSaveReservation(reservationRequestDTO,reservationId);
+        return reservationService.updateOrSaveReservation(reservationRequestDTO,reservationId);
     }
 
     @PostMapping("/reservation")
-    public Reservation saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException {
+    public Reservation saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
 
 
-        return reservationImpl.updateOrSaveReservation(reservationRequestDTO, null);
+        return reservationService.updateOrSaveReservation(reservationRequestDTO, null);
     }
 
     @DeleteMapping("/reservation/delete/{id}")

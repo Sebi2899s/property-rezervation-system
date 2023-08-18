@@ -6,28 +6,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
+import ro.itschool.Booking.Dto.ReservationRequestDTO;
+import ro.itschool.Booking.customException.*;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
+import ro.itschool.Booking.entity.Reservation;
 import ro.itschool.Booking.entity.Role;
-import ro.itschool.Booking.customException.IncorrectIdException;
-import ro.itschool.Booking.customException.IncorretNameException;
-import ro.itschool.Booking.customException.MobileNumberException;
 import ro.itschool.Booking.service.PersonService;
 import ro.itschool.Booking.service.PropertyService;
+import ro.itschool.Booking.service.ReservationService;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @EnableWebSecurity
-@RequestMapping(value = "admin")
-
+@RequestMapping(value = "/admin")
 @RequiredArgsConstructor
 public class AdminController {
     private final PersonService personService;
     private final PropertyService propertyService;
+    private final ReservationService reservationService;
 
-    @GetMapping(value = "/get-users")
+    @GetMapping(value = "/users")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Person>> getAllUsers(@RequestParam(defaultValue = "0") Integer pageNo,
                                                     @RequestParam(defaultValue = "10") Integer pageSize,
@@ -35,12 +37,20 @@ public class AdminController {
         return new ResponseEntity<>(personService.getAllPersons(pageNo, pageSize, sortBy), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/get-properties")
+    @GetMapping(value = "/properties")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Property>> getAllProperties(@RequestParam(defaultValue = "0") Integer pageNo,
                                                            @RequestParam(defaultValue = "10") Integer pageSize,
                                                            @RequestParam(defaultValue = "ASC") String sortBy) {
         return new ResponseEntity<>(propertyService.getAllProperties(pageNo, pageSize, sortBy), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/reservations")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<Reservation>> getAllReservations(@RequestParam(defaultValue = "0") Integer pageNo,
+                                                                @RequestParam(defaultValue = "10") Integer pageSize,
+                                                                @RequestParam(defaultValue = "ASC") String sortBy) {
+        return new ResponseEntity<>(reservationService.getAllReservationForAdmin(pageNo, pageSize, sortBy), HttpStatus.OK);
     }
 
     @PostMapping(value = "/add-user")
@@ -49,6 +59,14 @@ public class AdminController {
         checkEmailPersonExists(person);
         personService.savePerson(person);
         return new ResponseEntity<>(person, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/add-reservation")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Reservation> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws FieldValueException, IncorrectIdException, PersonNotFoundException {
+
+        Reservation reservation = reservationService.updateOrSaveReservation(reservationRequestDTO, null);
+        return new ResponseEntity<>(reservation, HttpStatus.OK);
     }
 
 
@@ -67,6 +85,30 @@ public class AdminController {
         return checkIfIdExistsAndSetRole(id, roles);
     }
 
+    @PutMapping(value = "/update-person/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person personRequest) throws IncorrectIdException, MobileNumberException, IncorretNameException {
+        checkIfPersonIdExists(id);
+        Person person = personService.updateOrSavePerson(personRequest, id);
+        return new ResponseEntity<>(person, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/update-property/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    ResponseEntity<Property> updateProperty(@PathVariable Long id, @RequestBody Property propertyRequest) throws IncorrectIdException {
+        checkPropertyIdExists(id);
+        Property property = propertyService.updateOrSaveProperty(propertyRequest, id);
+        return new ResponseEntity<>(property, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/update-reservation/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Reservation> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long id) throws FieldValueException, IncorrectIdException, PersonNotFoundException {
+
+        Reservation reservation = reservationService.updateOrSaveReservation(reservationRequestDTO, id);
+        return new ResponseEntity<>(reservation, HttpStatus.OK);
+    }
+
 
     @DeleteMapping(value = "/remove-person/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -83,6 +125,15 @@ public class AdminController {
         checkPropertyIdExists(id);
         personService.deletePerson(id);
         return new ResponseEntity<>(id, HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/remove-reservation/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Long> deleteReservation(@PathVariable Long id) throws IncorrectIdException {
+        reservationVerification(id);
+        reservationService.deleteReservation(id);
+        return new ResponseEntity<>(id, HttpStatus.OK);
+
     }
 
     private void checkPropertyIdExists(Long id) throws IncorrectIdException {
@@ -126,6 +177,17 @@ public class AdminController {
         Optional<Person> findById = personService.findById(id);
         if (findById.isEmpty()) {
             throw new IncorrectIdException("This id doesn't exists!");
+        }
+
+    }
+
+    private void reservationVerification(Long id) throws IncorrectIdException {
+        if (id != null) {
+            Optional<Reservation> reservationById = reservationService.getReservationById(id);
+
+            if (reservationById.isEmpty()) {
+                throw new NotFoundException("Reservation was not found!");
+            }
         }
     }
 }

@@ -227,4 +227,24 @@ public class PersonService {
         workbook.write(outputStream);
         outputStream.close();
     }
+    public Person updateOrSavePerson(Person personRequest, Long personId) throws MobileNumberException, IncorretNameException {
+        if (personId == null){
+            return savePerson(personRequest);
+        }else {
+            Person person = findById(personId).get();
+            if (person != null){
+                person.setEmail(personRequest.getEmail());
+                person.setPersonId(personRequest.getPersonId());
+                person.setLastName(personRequest.getLastName());
+                person.setFirstName(personRequest.getFirstName());
+                person.setProperty(personRequest.getProperty());
+                person.setPassword(personRequest.getPassword());
+                person.setMobileNumber(personRequest.getMobileNumber());
+                person.setReservations(personRequest.getReservations());
+                person.setSubscriber(personRequest.isSubscriber());
+
+            }
+            return savePerson(person);
+        }
+    }
 }

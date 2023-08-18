@@ -3,12 +3,20 @@ package ro.itschool.Booking.service;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ro.itschool.Booking.Dto.ReservationRequestDTO;
+import ro.itschool.Booking.customException.FieldValueException;
 import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Coupon;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
@@ -19,11 +27,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ReservationService {
+public class ReservationService  {
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -86,7 +95,60 @@ public class ReservationService {
 
     }
 
+    public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
 
+        if (reservationId != null) {
+            Person person = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
+            Property property = propertyService.getPropertyOrThrow(reservationRequestDTO.getPropertyId());
+            Coupon coupon = couponService.getCoupon(reservationRequestDTO.getCouponId());
+            String checkIn = reservationRequestDTO.getCheckIn();
+            String checkOut = reservationRequestDTO.getCheckOut();
+            LocalDate checkInDate = LocalDate.parse(checkIn);
+            LocalDate checkOutDate = LocalDate.parse(checkOut);
+            Reservation reservation = new Reservation();
+            reservation.setPerson(person);
+            reservation.setProperty(property);
+            reservation.setCheckInDate(checkInDate);
+            reservation.setCheckOutDate(checkOutDate);
+            reservation.setCoupon(coupon);
+            calculatePriceWithTax(reservationId, checkIn, checkOut, reservation, coupon);
+            return save(reservation);
+        } else {
+            Long personId;
+            if (reservationRequestDTO.getPersonId() != null) {
+                personId = reservationRequestDTO.getPersonId();
+            } else {
+                throw new FieldValueException("This field must have a value in this field!");
+            }
+
+            Long propertyId;
+            if (reservationRequestDTO.getPropertyId() != null) {
+
+                propertyId = reservationRequestDTO.getPropertyId();
+            } else {
+                throw new FieldValueException("This field must have a value in this field!");
+            }
+            String checkIn;
+            if (reservationRequestDTO.getCheckIn() != null) {
+                checkIn = reservationRequestDTO.getCheckIn();
+            } else {
+                throw new FieldValueException("This field must have a value in this field!");
+            }
+
+            String checkOut;
+            if (reservationRequestDTO.getCheckOut() != null) {
+                checkOut = reservationRequestDTO.getCheckOut();
+            } else {
+                throw new FieldValueException("This field must have a value in this field!");
+            }
+
+            Double price = reservationRequestDTO.getPrice();
+            Long couponId = reservationRequestDTO.getCouponId();
+            String country = reservationRequestDTO.getCountry();
+
+            return saveReservation(personId, propertyId, checkIn, checkOut, price, couponId, country);
+        }
+    }
 
     public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
@@ -108,6 +170,18 @@ public class ReservationService {
 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
+    }
+    public List<Reservation> getAllReservationForAdmin(Integer pageNo,
+                                           Integer pageSize,
+                                           String sortBy) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+
+        Page<Reservation> pagedResult = reservationRepository.findAll(paging);
+        if (pagedResult.hasContent()) {
+            return pagedResult.getContent();
+        } else {
+            return new ArrayList<Reservation>();
+        }
     }
 
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {

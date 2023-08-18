@@ -88,7 +88,7 @@ public class PropertyController {
     public ResponseEntity<PropertyDTO> saveProperty(@RequestBody Property property) {
         LOGGER.info("Saving a property");
         PropertyConvertor propertyConvertor = new PropertyConvertor();
-        propertyService.createOrUpdateProperty(property, null);
+        propertyService.updateOrSaveProperty(property, null);
         return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
     }
 
@@ -96,7 +96,7 @@ public class PropertyController {
     @PutMapping(value = "/update/{id}")
     public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @RequestBody Property property) {
         LOGGER.info("Updating a property using the id value");
-        propertyService.createOrUpdateProperty(property, id);
+        propertyService.updateOrSaveProperty(property, id);
         PropertyConvertor propertyConvertor = new PropertyConvertor();
         return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
     }
