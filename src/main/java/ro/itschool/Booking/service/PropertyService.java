@@ -5,6 +5,7 @@ import jakarta.el.PropertyNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -164,15 +165,6 @@ public class PropertyService {
 
 
 
-    //---------------------------------------------------------------------------------------------------------------------
-    //method that check if email exists
-    private void propertyEmailExistsCheck(Property property) {
-        Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
-        if (propertyOptional.isPresent()) {
-            throw new IllegalStateException(String.format("This email %s already exists", property.getPropertyEmail()));
-        }
-    }
-
 
     //---------------------------------------------------------------------------------------------------------------------
     //UPDATE
@@ -224,4 +216,15 @@ public class PropertyService {
     public Optional<Property> findById(Long id) {
         return propertyRepository.findById(id);
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    //method that check if email exists
+    private void propertyEmailExistsCheck(Property property) {
+        Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
+        if (propertyOptional.isPresent()) {
+            throw new IllegalStateException(String.format("This email %s already exists", property.getPropertyEmail()));
+        }
+    }
+
+
 }

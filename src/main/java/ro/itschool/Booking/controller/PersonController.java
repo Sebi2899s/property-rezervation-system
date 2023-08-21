@@ -16,6 +16,7 @@ import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
+import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.repository.PersonRepository;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PersonService;
@@ -54,8 +55,6 @@ public class PersonController {
     }
 
 
-
-
     //---------------------------------------------------------------------------------------------------------------------
     @GetMapping(value = "/excel")
     public void generateExcelReport(HttpServletResponse response) throws IOException {
@@ -73,11 +72,15 @@ public class PersonController {
 //---------------------------------------------------------------------------------------------------------------------
 
     @PostMapping(value = "/save")
-    public ResponseEntity<PersonDTO> personSave(@RequestBody Person person) throws MobileNumberException, IncorretNameException {
+    public Status personSave(@RequestBody Person personRq) throws MobileNumberException, IncorretNameException {
+
         LOGGER.info("Saving a person");
-        PersonConvertor personConvertor = new PersonConvertor();
-        personService.updateOrSavePerson(person, null);
-        return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
+        Status status = new Status();
+        Person person = personService.updateOrSavePerson(personRq, null);
+
+        status.setMessage("Person added successfully !");
+        status.setId(person.getPersonId());
+        return status;
     }
 
 
@@ -93,22 +96,32 @@ public class PersonController {
 //---------------------------------------------------------------------------------------------------------------------
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<PersonDTO> personUpdate(@PathVariable Long id, @RequestBody Person person) throws IncorrectIdException, MobileNumberException, IncorretNameException {
+    public Status personUpdate(@PathVariable Long id, @RequestBody Person personRq) throws IncorrectIdException, MobileNumberException, IncorretNameException {
+        Status status = new Status();
         LOGGER.info("Updating a person using the id value");
         checkIFIdExists(id);
-        personService.updateOrSavePerson(person, id);
-        PersonConvertor personConvertor = new PersonConvertor();
-        return new ResponseEntity<>(personConvertor.entityToDto(person), HttpStatus.OK);
+        Person person = personService.updateOrSavePerson(personRq, id);
+
+        status.setMessage("Person updated successfully !");
+        status.setId(person.getPersonId());
+
+        return status;
+
     }
 
 
     //---------------------------------------------------------------------------------------------------------------------
     @DeleteMapping(value = "/delete/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Long> deletePerson(@PathVariable Long id) throws IncorrectIdException {
+    public Status deletePerson(@PathVariable Long id) throws IncorrectIdException {
+
+        Status status = new Status();
         LOGGER.info("Deleting a person using the id value");
         checkIFIdExists(id);
-        return new ResponseEntity<>(id, HttpStatus.OK);
+
+        status.setMessage("Person deleted successfully !");
+        status.setId(id);
+
+        return status;
 
     }
 

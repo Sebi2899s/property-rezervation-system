@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.convertorDTO.PropertyConvertor;
 import ro.itschool.Booking.entity.Property;
+import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PropertyService;
 
@@ -85,28 +86,42 @@ public class PropertyController {
 
     //---------------------------------------------------------------------------------------------------------------------
     @PostMapping(value = "/save")
-    public ResponseEntity<PropertyDTO> saveProperty(@RequestBody Property property) {
+    public Status saveProperty(@RequestBody Property propertyRq) {
         LOGGER.info("Saving a property");
+        Status status = new Status();
         PropertyConvertor propertyConvertor = new PropertyConvertor();
-        propertyService.updateOrSaveProperty(property, null);
-        return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
+        Property property = propertyService.updateOrSaveProperty(propertyRq, null);
+
+        status.setMessage("Property added successfully !");
+        status.setId(property.getId());
+
+        return status;
     }
 
     //---------------------------------------------------------------------------------------------------------------------
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @RequestBody Property property) {
+    public Status updateProperty(@PathVariable Long id, @RequestBody Property propertyRq) {
         LOGGER.info("Updating a property using the id value");
-        propertyService.updateOrSaveProperty(property, id);
-        PropertyConvertor propertyConvertor = new PropertyConvertor();
-        return new ResponseEntity<>(propertyConvertor.entityToDto(property), HttpStatus.OK);
+        Status status = new Status();
+        Property property = propertyService.updateOrSaveProperty(propertyRq, id);
+
+        status.setMessage("Property updated successfully !");
+        status.setId(property.getId());
+
+        return status;
     }
 
     //---------------------------------------------------------------------------------------------------------------------
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<Long> deleteProperty(@PathVariable Long id) {
+    public Status deleteProperty(@PathVariable Long id) {
         LOGGER.info("Deleting a property using the id value");
+        Status status = new Status();
         propertyService.deleteProperty(id);
-        return new ResponseEntity<>(id, HttpStatus.OK);
+
+        status.setMessage("Property added successfully !");
+        status.setId(id);
+
+        return status;
     }
 
     //---------------------------------------------------------------------------------------------------------------------
