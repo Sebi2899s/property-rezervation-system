@@ -46,7 +46,7 @@ public class ReservationService {
     private final double TAX_ADDED = 2.5;
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, Long couponId, String country) throws IncorrectIdException {
+    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country) throws IncorrectIdException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
@@ -105,7 +105,7 @@ public class ReservationService {
         if (reservationId != null) {
             Person person = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
             Property property = propertyService.getPropertyOrThrow(reservationRequestDTO.getPropertyId());
-            Coupon coupon = couponService.getCoupon(reservationRequestDTO.getCouponId());
+            Coupon coupon = couponService.getCouponOrAnEmpty(reservationRequestDTO.getCouponId());
             String checkIn = reservationRequestDTO.getCheckIn();
             String checkOut = reservationRequestDTO.getCheckOut();
             LocalDate checkInDate = LocalDate.parse(checkIn);

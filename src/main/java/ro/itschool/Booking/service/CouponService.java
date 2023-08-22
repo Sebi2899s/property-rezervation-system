@@ -58,6 +58,16 @@ public class CouponService {
             throw new IncorrectIdException("This id: " + id + "was not found!");
         }
     }
+    public Coupon getCouponOrAnEmpty(Long id){
+        if (id != null) {
+            Optional<Coupon> getCouponById = couponRepository.findById(id);
+            Coupon coupon = getCouponById.get();
+            return coupon;
+        } else {
+            Coupon coupon =new Coupon();
+            return coupon;
+        }
+    }
 
     public Long deleteCoupon(Long id) {
         try {
