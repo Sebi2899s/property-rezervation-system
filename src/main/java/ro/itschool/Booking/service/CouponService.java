@@ -65,6 +65,7 @@ public class CouponService {
             return coupon;
         } else {
             Coupon coupon =new Coupon();
+            saveCoupon(coupon);
             return coupon;
         }
     }

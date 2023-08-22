@@ -41,4 +41,6 @@ public class Reservation {
     private LocalDate checkOutDate;
 
     private String country;
+
+    private String description;
 }

@@ -102,21 +102,44 @@ public class ReservationService {
     //---------------------------------------------------------------------------------------------------------------------
     public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
 
-        if (reservationId != null) {
-            Person person = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
-            Property property = propertyService.getPropertyOrThrow(reservationRequestDTO.getPropertyId());
-            Coupon coupon = couponService.getCouponOrAnEmpty(reservationRequestDTO.getCouponId());
-            String checkIn = reservationRequestDTO.getCheckIn();
-            String checkOut = reservationRequestDTO.getCheckOut();
-            LocalDate checkInDate = LocalDate.parse(checkIn);
-            LocalDate checkOutDate = LocalDate.parse(checkOut);
-            Reservation reservation = new Reservation();
-            reservation.setPerson(person);
-            reservation.setProperty(property);
-            reservation.setCheckInDate(checkInDate);
-            reservation.setCheckOutDate(checkOutDate);
-            reservation.setCoupon(coupon);
-            calculatePriceWithTax(reservationId, checkIn, checkOut, reservation, coupon);
+        if (reservationId == null) {
+            Person personRq = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
+
+            Property propertyRq = propertyService.getPropertyOrThrow(reservationRequestDTO.getPropertyId());
+
+            Coupon couponRq = couponService.getCouponOrAnEmpty(reservationRequestDTO.getCouponId());
+
+
+            String checkInRq = reservationRequestDTO.getCheckIn();
+
+            String checkOutRq = reservationRequestDTO.getCheckOut();
+
+            Double priceRq = reservationRequestDTO.getPrice();
+
+            String countryRq = reservationRequestDTO.getCountry();
+
+            String descriptionRq = reservationRequestDTO.getDescription();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+            LocalDate checkInDateRq = LocalDate.parse(checkInRq, formatter);
+
+            LocalDate checkOutDateRq = LocalDate.parse(checkOutRq, formatter);
+
+
+            Reservation reservation = Reservation.builder()
+                    .person(personRq)
+                    .property(propertyRq)
+                    .checkInDate(checkInDateRq)
+                    .checkOutDate(checkOutDateRq)
+                    .coupon(couponRq)
+                    .country(countryRq)
+                    .price(priceRq)
+                    .description(descriptionRq)
+                    .build();
+
+            calculatePriceWithTax(reservationId, checkInRq, checkOutRq, reservation, couponRq);
+
             return save(reservation);
         } else {
             Long personId;
