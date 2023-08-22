@@ -8,6 +8,7 @@ import ro.itschool.Booking.customException.FieldValueException;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Reservation;
+import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.service.ReservationService;
 
 import java.io.IOException;
@@ -36,24 +37,6 @@ public class ReservationController {
         return allReservations;
     }
 
-    @PutMapping("/reservation/update/{reservationId}")
-    public Reservation updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException, FieldValueException {
-
-        return reservationService.updateOrSaveReservation(reservationRequestDTO,reservationId);
-    }
-
-    @PostMapping("/reservation")
-    public Reservation saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
-
-
-        return reservationService.updateOrSaveReservation(reservationRequestDTO, null);
-    }
-
-    @DeleteMapping("/reservation/delete/{id}")
-    public String deleteReservation(Long id) throws IncorrectIdException {
-        return reservationService.deleteReservation(id);
-    }
-
     @GetMapping(value = "/excel")
     public void generateExcelReport(HttpServletResponse response) throws IOException {
 
@@ -66,5 +49,41 @@ public class ReservationController {
         response.setHeader(headerKey, headerValue);
         reservationService.generateExcel(response);
     }
+
+
+    @PutMapping("/reservation/update/{reservationId}")
+    public Status updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException, FieldValueException {
+        Status status = new Status();
+        reservationService.updateOrSaveReservation(reservationRequestDTO, reservationId);
+
+        status.setMessage("Reservation updated successfully !");
+        status.setId(reservationId);
+
+        return status;
+    }
+
+    @PostMapping("/reservation")
+    public Status saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
+        Status status = new Status();
+
+        Reservation reservation = reservationService.updateOrSaveReservation(reservationRequestDTO, null);
+
+        status.setMessage("Reservation saved successfully !");
+        status.setId(reservation.getId());
+        return status;
+    }
+
+    @DeleteMapping("/reservation/delete/{id}")
+    public Status deleteReservation(Long id) throws IncorrectIdException {
+
+        Status status = new Status();
+        reservationService.deleteReservation(id);
+
+        status.setMessage("Reservation deleted successfully !");
+        status.setId(id);
+
+        return status;
+    }
+
 
 }
