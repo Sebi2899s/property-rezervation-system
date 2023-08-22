@@ -8,6 +8,9 @@ User registration and authentication using JWT.
 CRUD operations for managing persons and properties.
 Ability to search for properties based on various criteria.
 Booking functionality to reserve properties for a specific date range.
+Price calculation depending on days reservation.
+Reminder for reservation.
+Coupon that will be applied to price calculation.
 Access control to ensure only authenticated users can perform certain actions.
 There are access control just for ADMIN.
 
