@@ -22,7 +22,7 @@ public class Coupon {
     private LocalDate validTo;
     private double discount;
 
-    private boolean activCoupon;
+    private boolean isUsed;
     @OneToMany(mappedBy = "coupon")
     private List<Reservation> reservations;
 

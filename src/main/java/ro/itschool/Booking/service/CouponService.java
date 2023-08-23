@@ -28,7 +28,7 @@ public class CouponService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
         LocalDate validFrom = LocalDate.parse(validFrom_, formatter);
         LocalDate validTo = LocalDate.parse(validTo_, formatter);
-        coupon.setActivCoupon(isActiv);
+        coupon.setUsed(isActiv);
         coupon.setCode(code);
         coupon.setDiscount(discount);
         coupon.setValidFrom(validFrom);
@@ -45,8 +45,8 @@ public class CouponService {
         coupon.setValidFrom(validFrom);
         coupon.setValidTo(validTo);
         coupon.setDiscount(discount);
-        coupon.setActivCoupon(isActiv);
-        return coupon;
+        coupon.setUsed(isActiv);
+        return couponRepository.save(coupon);
     }
 
     public Coupon getCoupon(Long id) throws IncorrectIdException {

@@ -310,7 +310,7 @@ public class ReservationService {
     //---------------------------------------------------------------------------------------------------------------------
     private void verificationIfCouponIsActiveAndCalculatePrice(Reservation reservation, Coupon coupon, Double totalPrice) {
         double finalPrice;
-        if (coupon.isActivCoupon()) {
+        if (coupon.isUsed()) {
             //getValuePercentageOfDiscount this method return the discount value
             Double couponDiscount = getValuePercentageOfDiscount(coupon);
 
