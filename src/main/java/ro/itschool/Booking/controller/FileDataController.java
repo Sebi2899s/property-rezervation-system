@@ -15,12 +15,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.FileData;
+import ro.itschool.Booking.entity.Reservation;
+import ro.itschool.Booking.service.GeneratePdfInvoiceService;
+import ro.itschool.Booking.service.ReservationService;
 import ro.itschool.Booking.service.StorageService;
 import ro.itschool.Booking.util.FileDataUtils;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RestController
@@ -29,6 +37,10 @@ public class FileDataController {
 
     @Autowired
     private StorageService service;
+    @Autowired
+    private GeneratePdfInvoiceService generatePdfInvoiceService;
+    @Autowired
+    private ReservationService reservationService;
 
     @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
@@ -37,18 +49,18 @@ public class FileDataController {
     }
 
     @GetMapping(value = "/download")
-    public ResponseEntity<?> downloadFile(@Param("id")Long id, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> downloadFile(@Param("id") Long id, HttpServletResponse response) throws IOException {
         Optional<FileData> result = service.findById(id);
-        if (!result.isPresent()){
-            throw new RuntimeException("Couldn't find the file with id "+ id);
+        if (!result.isPresent()) {
+            throw new RuntimeException("Couldn't find the file with id " + id);
         }
         byte[] decompressFileFromDb = FileDataUtils.decompressFile(result.get().getFileData());
         FileData fileData = result.get();
         response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-        String headerKey="Content-Disposition";
+        String headerKey = "Content-Disposition";
         String headerValue = "attachment; filename" + fileData.getName();
 
-        response.setHeader(headerKey,headerValue);
+        response.setHeader(headerKey, headerValue);
 
         ServletOutputStream outputStream = response.getOutputStream();
         outputStream.write(fileData.getFileData());
@@ -76,4 +88,21 @@ public class FileDataController {
 
         writer.write(dataList);
     }
+
+    @GetMapping("/invoice")
+    public void downloadReservationPdf(HttpServletResponse response,@RequestParam Long reservationId) throws IOException, IncorrectIdException {
+
+        Reservation reservationById = reservationService.getReservationById(reservationId).get();
+        response.setContentType("application/pdf");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String currentDateTime = dateFormat.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=pdf_" + currentDateTime + ".pdf";
+
+        this.generatePdfInvoiceService.export(response,reservationById);
+
+
+    }
+
 }

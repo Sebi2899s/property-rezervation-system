@@ -1,6 +1,10 @@
 package ro.itschool.Booking.service.email.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -12,10 +16,14 @@ import java.util.List;
 
 @Service
 public class EmailSenderServiceImpl implements EmailBodyService {
-    @Autowired
-    private JavaMailSender sender;
+    private final JavaMailSender sender;
 
-    @Override
+    @Autowired
+    public EmailSenderServiceImpl(JavaMailSender sender) {
+        this.sender = sender;
+    }
+
+
     public void sendEmail(String email, String content, String subject) {
 
 
