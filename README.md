@@ -16,11 +16,11 @@ There are access control just for ADMIN.
 
 ## Technologies Used
 
-Java Spring Boot
-Spring Security
-JSON Web Token (JWT)
-MySQL 
-Hibernate ORM
+Java Spring Boot, 
+Spring Security, 
+JSON Web Token (JWT), 
+MySQL, 
+Hibernate ORM, 
 Maven (for dependency management)
 
 ## Prerequisites
