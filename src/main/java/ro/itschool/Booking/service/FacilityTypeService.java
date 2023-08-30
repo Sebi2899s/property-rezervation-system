@@ -1,18 +1,17 @@
 package ro.itschool.Booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.FacilityType;
 import ro.itschool.Booking.repository.FacilityTypeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class FacilityTypeService {
     @Autowired
     private FacilityTypeRepository facilityTypeRepository;
-    @Autowired
-    private FacilityService facilityService;
 
     public List<FacilityType> getAllFacilitiesType() {
         List<FacilityType> facilityTypeList = facilityTypeRepository.findAll();

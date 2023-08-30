@@ -1,20 +1,19 @@
 package ro.itschool.Booking.service;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
 import lombok.NonNull;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 import ro.itschool.Booking.Dto.FacilityRq;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.Facility;
 import ro.itschool.Booking.entity.FacilityType;
 import ro.itschool.Booking.repository.FacilityRepository;
+import ro.itschool.Booking.repository.FacilityTypeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class FacilityService {
     @Autowired
     private FacilityRepository facilityRepository;
