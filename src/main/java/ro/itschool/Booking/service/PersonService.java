@@ -1,9 +1,7 @@
 package ro.itschool.Booking.service;
 
-import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -20,7 +18,6 @@ import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
-import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Role;
 import ro.itschool.Booking.repository.PersonRepository;
 import ro.itschool.Booking.repository.PropertyRepository;
@@ -33,7 +30,7 @@ import java.util.Optional;
 @Service
 public class PersonService {
     @Autowired
-    private  PersonRepository personRepository;
+    private PersonRepository personRepository;
     @Autowired
     private ModelMapper mapper;
 
@@ -63,7 +60,17 @@ public class PersonService {
     }
 
     //\---------------------------------------------------------------------------------------------------------------------
-    public Optional<PersonDTO> getById(Long id) throws IncorrectIdException {
+
+    public Person getByIdPerson(Long id) {
+        if (id==null){
+            throw new RuntimeException("This id must not be null");
+        }
+        return personRepository.findById(id).get();
+    }
+
+
+    //\---------------------------------------------------------------------------------------------------------------------
+    public Optional<PersonDTO> getByIdPersonDTO(Long id) throws IncorrectIdException {
         Optional<Person> person = personRepository.findById(id);
         PersonDTO personDto = mapper.map(person, PersonDTO.class);
         if (person.isEmpty()) {
@@ -93,8 +100,6 @@ public class PersonService {
         return personRepository.save(person);
 
     }
-
-
 
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -180,7 +185,6 @@ public class PersonService {
     }
 
 
-
     // generate EXCEL
     //---------------------------------------------------------------------------------------------------------------------
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
@@ -207,13 +211,13 @@ public class PersonService {
         outputStream.close();
     }
 
- //---------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------
     public Person updateOrSavePerson(Person personRequest, Long personId) throws MobileNumberException, IncorretNameException {
-        if (personId == null){
+        if (personId == null) {
             return savePerson(personRequest);
-        }else {
+        } else {
             Person person = findById(personId).get();
-            if (person != null){
+            if (person != null) {
                 person.setEmail(personRequest.getEmail());
                 person.setPersonId(personRequest.getPersonId());
                 person.setLastName(personRequest.getLastName());

@@ -2,8 +2,10 @@ package ro.itschool.Booking.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,6 +34,10 @@ public class Person implements UserDetails, ClonePerson {
     private String email;
 
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
+    @JsonIgnore
+    private List<RoomReservation> roomReservations;
 
 
     @Enumerated(EnumType.STRING)

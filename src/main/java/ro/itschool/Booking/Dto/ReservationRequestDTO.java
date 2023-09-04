@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,9 +20,11 @@ public class ReservationRequestDTO {
     private String checkIn;
     private String checkOut;
     private String country;
-
     private Double price;
     private String description;
+
+    private Long roomReservationId;
+
 
 
 }
