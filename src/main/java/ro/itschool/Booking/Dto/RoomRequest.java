@@ -16,5 +16,5 @@ public class RoomRequest {
     private String type;
 
     private boolean bookingEnabled;
-    private List<RoomReservation> roomReservations;
+    private Long roomReservationId;
 }
