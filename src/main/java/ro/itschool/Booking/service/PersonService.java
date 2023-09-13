@@ -18,6 +18,7 @@ import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
+import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Role;
 import ro.itschool.Booking.repository.PersonRepository;
 import ro.itschool.Booking.repository.PropertyRepository;
@@ -231,5 +232,9 @@ public class PersonService {
             }
             return savePerson(person);
         }
+    }
+    public List<Person> getPropertyByPersonFirstName(String propertyName) {
+
+        return personRepository.getAllPersonsByPropertiesName(propertyName);
     }
 }

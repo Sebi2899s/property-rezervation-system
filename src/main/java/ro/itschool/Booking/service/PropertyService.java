@@ -2,15 +2,13 @@ package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
 import jakarta.el.PropertyNotFoundException;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Join;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.Dto.PropertyDTO;
+import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
@@ -33,10 +32,10 @@ public class PropertyService {
     //dependency injection
     private final PropertyRepository propertyRepository;
 
+
     public PropertyService(PropertyRepository propertyRepository) {
         this.propertyRepository = propertyRepository;
     }
-
 
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -80,21 +79,14 @@ public class PropertyService {
     }
 
 
-
     //---------------------------------------------------------------------------------------------------------------------
-    //get property by property type using query specification
-    public List<Property> getPropertyByPropertyType(String propertyTipe) {
-        Specification<Property> propertySpecification = Specifications.getPropertyByPropertyType(propertyTipe);
-        return propertyRepository.findAll(propertySpecification);
+
+    public List<Property> getPropertiesByType(String propertyType) {
+        List<Property> allByPropertyType = propertyRepository.findAllByPropertyType(propertyType);
+        return allByPropertyType;
     }
 
 
-    //---------------------------------------------------------------------------------------------------------------------
-    //get property where person have the following first name
-    public List<Property> getPropertyByPersonFirstName(String firstName) {
-        Specification<Property> specifications = Specifications.getPropertyByPersonFirstName(firstName);
-        return propertyRepository.findAll(specifications);
-    }
 
     //---------------------------------------------------------------------------------------------------------------------
     //excel file report of all persons
@@ -127,7 +119,6 @@ public class PropertyService {
     }
 
 
-
     //---------------------------------------------------------------------------------------------------------------------
     //POST
     public Property createProperty(Property property_p) {
@@ -142,13 +133,13 @@ public class PropertyService {
     }
 
 
- //---------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------
     public Property updateOrSaveProperty(@NotNull Property propertyRequest, @Nullable Long propertyId) {
-        if (propertyId==null){
+        if (propertyId == null) {
             return createProperty(propertyRequest);
-        }else {
+        } else {
             Property property = findById(propertyId).get();
-            if (property!=null){
+            if (property != null) {
                 property.setPropertyName(propertyRequest.getPropertyName());
                 property.setPropertyLocation(propertyRequest.getPropertyLocation());
                 property.setPropertyAddress(propertyRequest.getPropertyAddress());
@@ -162,8 +153,6 @@ public class PropertyService {
             return createProperty(property);
         }
     }
-
-
 
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -211,7 +200,6 @@ public class PropertyService {
     }
 
 
-
     //---------------------------------------------------------------------------------------------------------------------
     public Optional<Property> findById(Long id) {
         return propertyRepository.findById(id);
@@ -226,5 +214,8 @@ public class PropertyService {
         }
     }
 
-
+    public static Specification<Property> getPropertyByPropertyType(String propertyType) {
+        Specification<Property> propertySpecification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("propertyType"), propertyType);
+        return propertySpecification;
+    }
 }

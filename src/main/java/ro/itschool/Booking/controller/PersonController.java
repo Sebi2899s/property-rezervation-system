@@ -69,6 +69,14 @@ public class PersonController {
         personService.generateExcel(response);
     }
 
+
+    @GetMapping(value = "/persons/property-name")
+    public ResponseEntity<List<Person>> getPersonsByPropertyName(@RequestParam String propertyName) {
+        List<Person> propertyByPersonFirstName = personService.getPropertyByPersonFirstName(propertyName);
+        return new ResponseEntity<>(propertyByPersonFirstName, HttpStatus.OK);
+    }
+
+
 //---------------------------------------------------------------------------------------------------------------------
 
     @PostMapping(value = "/save")

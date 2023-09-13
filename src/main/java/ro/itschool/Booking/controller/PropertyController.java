@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,19 +55,14 @@ public class PropertyController {
 //---------------------------------------------------------------------------------------------------------------------
 
     @GetMapping(value = "/type")
-    public ResponseEntity<List<PropertyDTO>> propertyByPropertyType(@RequestParam String propertyType) {
-        List<Property> propertyByPropertyType = propertyService.getPropertyByPropertyType(propertyType);
-        return new ResponseEntity<>(propertyByPropertyType.stream().map(Property::toDTO).toList(), HttpStatus.OK);
+    public ResponseEntity<List<Property>> propertyByPropertyType(@RequestParam String propertyType) {
+        List<Property> propertyByPropertyType = propertyService.getPropertiesByType(propertyType);
+        return new ResponseEntity<>(propertyByPropertyType, HttpStatus.OK);
     }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 
-    @GetMapping(value = "/person-first-name")
-    public ResponseEntity<List<PropertyDTO>> propertyByCustomerFirstName(@RequestParam String firstName) {
-        List<Property> propertyByPersonFirstName = propertyService.getPropertyByPersonFirstName(firstName);
-        return new ResponseEntity<>(propertyByPersonFirstName.stream().map(Property::toDTO).toList(), HttpStatus.OK);
-    }
 
 
     //---------------------------------------------------------------------------------------------------------------------
