@@ -48,8 +48,8 @@ public class FileDataController {
         return ResponseEntity.status(HttpStatus.OK).body(uploadFile);
     }
 
-    @GetMapping(value = "/download")
-    public ResponseEntity<?> downloadFile(@Param("id") Long id, HttpServletResponse response) throws IOException {
+    @GetMapping(value = "/download/{id}")
+    public ResponseEntity<?> downloadFile(@PathVariable Long id, HttpServletResponse response) throws IOException {
         Optional<FileData> result = service.findById(id);
         if (!result.isPresent()) {
             throw new RuntimeException("Couldn't find the file with id " + id);
@@ -89,10 +89,10 @@ public class FileDataController {
         writer.write(dataList);
     }
 
-    @GetMapping("/invoice")
-    public void downloadReservationPdf(HttpServletResponse response,@RequestParam Long reservationId) throws IOException, IncorrectIdException {
+    @GetMapping("/invoice/{id}")
+    public void downloadReservationPdf(HttpServletResponse response,@PathVariable Long id) throws IOException, IncorrectIdException {
 
-        Reservation reservationById = reservationService.getReservationById(reservationId).get();
+        Reservation reservationById = reservationService.getReservationById(id).get();
         response.setContentType("application/pdf");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String currentDateTime = dateFormat.format(new Date());

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ro.itschool.Booking.Dto.ReservationRequestDTO;
 import ro.itschool.Booking.entity.Person;
@@ -27,6 +28,7 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
             "JOIN property ON property.id = person.property_id " +
             "WHERE property.property_name = :propertyName",nativeQuery = true)
     List<Person> getAllPersonsByPropertiesName(String propertyName);
-
+    @Query(value = "SELECT * FROM person WHERE LOWER(person.first_name) LIKE LOWER(%:name%)", nativeQuery = true)
+    List<Person> getPersonsByFirstName(@Param("name") String name);
 
 }

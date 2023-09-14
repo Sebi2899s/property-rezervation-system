@@ -7,6 +7,8 @@ import ro.itschool.Booking.entity.Coupon;
 import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.service.CouponService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class CouponController {
@@ -15,8 +17,13 @@ public class CouponController {
     private CouponService couponService;
 
     @GetMapping(value = "/coupon/{id}")
-    public Coupon getCouponById(@RequestParam Long id) throws Exception {
+    public Coupon getCouponById(@PathVariable Long id) throws Exception {
         return couponService.getCoupon(id);
+    }
+
+    @GetMapping(value = "/all")
+    public List<Coupon> getAllCoupons(){
+        return couponService.getAllCoupons();
     }
 
     @PostMapping(value = "/coupon")
@@ -52,7 +59,7 @@ public class CouponController {
     }
 
     @DeleteMapping(value = "/coupon/{id}")
-    public Status deleteCoupon(@RequestParam Long id) {
+    public Status deleteCoupon(@PathVariable Long id) {
         Status status = new Status();
         Long couponId = couponService.deleteCoupon(id);
 

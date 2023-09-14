@@ -16,30 +16,30 @@ public class FacilityController {
     private FacilityService facilityService;
 
 
-    @GetMapping(path = "/all")
+    @GetMapping(value = "/all")
     public List<Facility> getAllFacilities() {
         return facilityService.getAllFacilities();
     }
 
-    @GetMapping()
-    public Facility getFacility(Long id) throws IncorrectIdException {
+    @GetMapping(value = "/facility/{id}")
+    public Facility getFacility(@PathVariable Long id) throws IncorrectIdException {
         return facilityService.getFacilityById(id);
     }
 
-    @PostMapping(path = "/save")
+    @PostMapping(value = "/save")
     public Facility saveFacility(@RequestBody FacilityRq facilityRq) throws IncorrectIdException {
         return facilityService.saveFacility(facilityRq);
 
     }
 
-    @PutMapping(path = "/update")
-    public Facility updateFacility(@RequestParam Long facilityId, @RequestBody FacilityRq facilityRq) throws IncorrectIdException {
-        return facilityService.updateFacility(facilityId, facilityRq);
+    @PutMapping(value = "/update/{id}")
+    public Facility updateFacility(@PathVariable Long id, @RequestBody FacilityRq facilityRq) throws IncorrectIdException {
+        return facilityService.updateFacility(id, facilityRq);
 
     }
 
-    @DeleteMapping(path = "/delete")
-    public Long deleteFacility(@RequestParam Long facilityId) throws IncorrectIdException {
-        return facilityService.deleteFacility(facilityId);
+    @DeleteMapping(value = "/delete/{id}")
+    public Long deleteFacility(@PathVariable Long id) throws IncorrectIdException {
+        return facilityService.deleteFacility(id);
     }
 }

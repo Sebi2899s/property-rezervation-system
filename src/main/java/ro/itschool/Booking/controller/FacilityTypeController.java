@@ -15,28 +15,28 @@ public class FacilityTypeController {
     @Autowired
     private FacilityTypeService facilityTypeService;
 
-    @GetMapping(path = "/get-all")
+    @GetMapping(value = "/get-all")
     public List<FacilityType> facilityTypeList() {
         return facilityTypeService.getAllFacilitiesType();
     }
 
-    @GetMapping()
-    public FacilityType getFacilityTypeById (@RequestParam Long facilityTypeId) throws IncorrectIdException {
-        return facilityTypeService.getFacilityTypeById(facilityTypeId);
+    @GetMapping(value = "/facility-type/{id}")
+    public FacilityType getFacilityTypeById (@PathVariable Long id) throws IncorrectIdException {
+        return facilityTypeService.getFacilityTypeById(id);
     }
 
-    @PostMapping(path = "/save")
+    @PostMapping(value = "/save")
     public FacilityType saveFacilityType(@RequestBody FacilityType facilityType){
         return facilityTypeService.saveFacilityType(facilityType);
     }
 
-    @PutMapping(path = "/update")
-    public FacilityType updateFacilityType(@RequestParam Long facilityTypeId, @RequestBody FacilityType facilityType) throws IncorrectIdException {
-        return facilityTypeService.updateFacilityType(facilityTypeId,facilityType);
+    @PutMapping(value = "/update/{id}")
+    public FacilityType updateFacilityType(@PathVariable Long id, @RequestBody FacilityType facilityType) throws IncorrectIdException {
+        return facilityTypeService.updateFacilityType(id,facilityType);
     }
 
-    @DeleteMapping(path = "/delete")
-    public Long deleteFacilityType(@RequestParam Long facilityTypeId) throws IncorrectIdException {
-        return facilityTypeService.deleteFacilityType(facilityTypeId);
+    @DeleteMapping(value = "/delete/{id}")
+    public Long deleteFacilityType(@PathVariable Long id) throws IncorrectIdException {
+        return facilityTypeService.deleteFacilityType(id);
     }
 }

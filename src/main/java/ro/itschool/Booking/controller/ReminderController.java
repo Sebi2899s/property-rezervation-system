@@ -54,7 +54,7 @@ public class ReminderController {
     }
 
     @Transactional
-    @PostMapping(value = "/update")
+    @PutMapping(value = "/update")
     public Status updateReminder(@RequestBody Reminder reminderRq, @RequestParam Long reservationId) throws IncorrectIdException {
 
         Status status = new Status();
