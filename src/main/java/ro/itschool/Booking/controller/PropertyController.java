@@ -46,9 +46,20 @@ public class PropertyController {
 
     //get reservation by name
     @GetMapping(value = "/name")
-    public ResponseEntity<List<PropertyDTO>> properties(@RequestParam String name) {
+    public ResponseEntity<List<Property>> properties(@RequestParam String name) {
         LOGGER.info("Getting property by name");
-        return new ResponseEntity<>(propertyService.getPropertiesByNameAndSortedAlphabetically(name).stream().map(Property::toDTO).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(propertyService.getPropertiesByNameAndSortedAlphabetically(name), HttpStatus.OK);
+    }
+    @GetMapping(value = "/name-filter")
+    public ResponseEntity<List<Property>> getPropertyByName(@RequestParam String name) {
+
+        List<Property> propertyByNameFilter = propertyService.getPropertyByNameFilter(name);
+        if (propertyByNameFilter.isEmpty()){
+            LOGGER.info("Error to get property by name");
+        }else {
+            LOGGER.info("Getting property by name");
+        }
+        return new ResponseEntity<>(propertyByNameFilter, HttpStatus.OK);
     }
 
 

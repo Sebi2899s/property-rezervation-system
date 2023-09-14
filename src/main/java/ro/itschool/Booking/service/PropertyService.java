@@ -45,6 +45,16 @@ public class PropertyService {
         return properties;
     }
 
+    //-------------------------------------------------------------------------------------------------------------------
+//get property by name without sorting
+    public List<Property> getPropertyByNameFilter(String name) {
+        List<Property> properties = propertyRepository.getPropertyByName(name);
+        if (properties.isEmpty() || properties == null) {
+            return new ArrayList<>();
+        }
+        return properties;
+    }
+
 
     //---------------------------------------------------------------------------------------------------------------------
     //GET
@@ -85,7 +95,6 @@ public class PropertyService {
         List<Property> allByPropertyType = propertyRepository.findAllByPropertyType(propertyType);
         return allByPropertyType;
     }
-
 
 
     //---------------------------------------------------------------------------------------------------------------------

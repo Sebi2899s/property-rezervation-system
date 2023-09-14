@@ -55,7 +55,7 @@ public class PersonController {
     }
 
 
-    //---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
     @GetMapping(value = "/excel")
     public void generateExcelReport(HttpServletResponse response) throws IOException {
 
@@ -69,7 +69,8 @@ public class PersonController {
         personService.generateExcel(response);
     }
 
-
+//---------------------------------------------------------------------------------------------------------------------
+   //get all persons that have a reservation to a specific property
     @GetMapping(value = "/persons/property-name")
     public ResponseEntity<List<Person>> getPersonsByPropertyName(@RequestParam String propertyName) {
         List<Person> propertyByPersonFirstName = personService.getPropertyByPersonFirstName(propertyName);
