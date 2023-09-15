@@ -15,6 +15,7 @@ import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.service.PropertyService;
+import ro.itschool.Booking.specifications.PropertyTypeAndNameRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -131,11 +132,22 @@ public class PropertyController {
         return status;
     }
 
-    //---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
     @GetMapping("/property/{id}")
     public ResponseEntity<Optional<PropertyDTO>> getPropertyById(@PathVariable Long id) {
         return new ResponseEntity<>(propertyService.checkIfIdExistsConvertToDto(id), HttpStatus.OK);
 
     }
+
+
+//---------------------------------------------------------------------------------------------------------------------
+    @PostMapping(value = "/name-type")
+    public List<Property> getPropertiesByNameAndType(@RequestBody PropertyTypeAndNameRequest propertyTypeAndNameRequest){
+        return propertyService.getPropertiesByTypeAndName(propertyTypeAndNameRequest);
+    }
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
 
 }

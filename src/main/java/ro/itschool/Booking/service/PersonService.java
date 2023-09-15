@@ -18,10 +18,11 @@ import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
-import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Role;
 import ro.itschool.Booking.repository.PersonRepository;
 import ro.itschool.Booking.repository.PropertyRepository;
+import ro.itschool.Booking.specifications.PersonRoleAndFirstNameRequest;
+import ro.itschool.Booking.specifications.QuerySpecificationsDao;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ public class PersonService {
 
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private QuerySpecificationsDao querySpecificationsDao;
 
 
     public PersonService(PersonRepository repository) {
@@ -244,5 +248,8 @@ public class PersonService {
             return new ArrayList<>();
         }
         return personList;
+    }
+    public List<Person> getPersonNameAndRole(PersonRoleAndFirstNameRequest personRoleAndFirstNameRequest){
+        return querySpecificationsDao.getAllPersonByFirstNameOrMobileNumber(personRoleAndFirstNameRequest);
     }
 }

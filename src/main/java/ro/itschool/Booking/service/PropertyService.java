@@ -2,7 +2,6 @@ package ro.itschool.Booking.service;
 
 import jakarta.annotation.Nullable;
 import jakarta.el.PropertyNotFoundException;
-import jakarta.persistence.criteria.Join;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -16,12 +15,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.Dto.PropertyDTO;
-import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.repository.PropertyRepository;
-import ro.itschool.Booking.specifications.Specifications;
+import ro.itschool.Booking.specifications.PropertyTypeAndNameRequest;
+import ro.itschool.Booking.specifications.QuerySpecificationsDao;
 
 import java.io.IOException;
 import java.util.*;
@@ -31,10 +30,12 @@ import java.util.*;
 public class PropertyService {
     //dependency injection
     private final PropertyRepository propertyRepository;
+    private final QuerySpecificationsDao querySpecificationsDao;
 
 
-    public PropertyService(PropertyRepository propertyRepository) {
+    public PropertyService(PropertyRepository propertyRepository, QuerySpecificationsDao querySpecificationsDao) {
         this.propertyRepository = propertyRepository;
+        this.querySpecificationsDao = querySpecificationsDao;
     }
 
 
@@ -190,6 +191,11 @@ public class PropertyService {
         else {
             propertyRepository.deleteById(id);
         }
+    }
+//---------------------------------------------------------------------------------------------------------------------
+
+    public List<Property> getPropertiesByTypeAndName(PropertyTypeAndNameRequest propertyTypeAndNameRequest) {
+        return querySpecificationsDao.getAllPropertyByTypeAndName(propertyTypeAndNameRequest);
     }
 
 
