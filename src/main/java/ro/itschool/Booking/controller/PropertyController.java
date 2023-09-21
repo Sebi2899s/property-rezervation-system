@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.convertorDTO.PropertyConvertor;
+import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.repository.PropertyRepository;
@@ -94,7 +95,7 @@ public class PropertyController {
 
     //---------------------------------------------------------------------------------------------------------------------
     @PostMapping(value = "/save")
-    public Status saveProperty(@RequestBody Property propertyRq) {
+    public Status saveProperty(@RequestBody Property propertyRq) throws IncorrectIdException {
         LOGGER.info("Saving a property");
         Status status = new Status();
         PropertyConvertor propertyConvertor = new PropertyConvertor();
@@ -108,7 +109,7 @@ public class PropertyController {
 
     //---------------------------------------------------------------------------------------------------------------------
     @PutMapping(value = "/update/{id}")
-    public Status updateProperty(@PathVariable Long id, @RequestBody Property propertyRq) {
+    public Status updateProperty(@PathVariable Long id, @RequestBody Property propertyRq) throws IncorrectIdException {
         LOGGER.info("Updating a property using the id value");
         Status status = new Status();
         Property property = propertyService.updateOrSaveProperty(propertyRq, id);

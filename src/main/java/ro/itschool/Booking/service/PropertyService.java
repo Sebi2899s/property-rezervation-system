@@ -144,41 +144,33 @@ public class PropertyService {
 
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Property updateOrSaveProperty(@NotNull Property propertyRequest, @Nullable Long propertyId) {
+    public Property updateOrSaveProperty(@NotNull Property propertyRequest, @Nullable Long propertyId) throws IncorrectIdException {
         if (propertyId == null) {
             return createProperty(propertyRequest);
         } else {
-            Property property = findById(propertyId).get();
-            if (property != null) {
-                property.setPropertyName(propertyRequest.getPropertyName());
-                property.setPropertyLocation(propertyRequest.getPropertyLocation());
-                property.setPropertyAddress(propertyRequest.getPropertyAddress());
-                property.setPropertyType(propertyRequest.getPropertyType());
-                property.setDescription(propertyRequest.getDescription());
-                property.setPropertyLocation(propertyRequest.getPropertyLocation());
-                property.setPrice(propertyRequest.getPrice());
-                property.setPersonList(propertyRequest.getPersonList());
-                property.setReservations(propertyRequest.getReservations());
-            }
+            Property property = updateProperty(propertyId, propertyRequest);
             return createProperty(property);
         }
     }
 
 
+
     //---------------------------------------------------------------------------------------------------------------------
     //UPDATE
-    public void updateProperty(Long id, Property property) throws IncorrectIdException {
-        Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + property.getId() + "is not found! "));
-        propertyEmailExistsCheck(property);
+    public Property updateProperty(Long id, Property propertyRequest) throws IncorrectIdException {
+        Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + id + "is not found! "));
+        propertyEmailExistsCheck(propertyRequest);
 
-        propertyUpdate.setId(property.getId());
-        propertyUpdate.setPropertyName(property.getPropertyName());
-        propertyUpdate.setPropertyEmail(property.getPropertyEmail());
-        propertyUpdate.setPropertyLocation(property.getPropertyLocation());
-        propertyUpdate.setPropertyAddress(property.getPropertyAddress());
-        propertyUpdate.setPropertyType(property.getPropertyType());
-        propertyUpdate.setPrice(property.getPrice());
-        propertyUpdate.setDescription(property.getDescription());
+        propertyUpdate.setPropertyName(propertyRequest.getPropertyName());
+        propertyUpdate.setPropertyLocation(propertyRequest.getPropertyLocation());
+        propertyUpdate.setPropertyAddress(propertyRequest.getPropertyAddress());
+        propertyUpdate.setPropertyType(propertyRequest.getPropertyType());
+        propertyUpdate.setDescription(propertyRequest.getDescription());
+        propertyUpdate.setPropertyLocation(propertyRequest.getPropertyLocation());
+        propertyUpdate.setPrice(propertyRequest.getPrice());
+        propertyUpdate.setPersonList(propertyRequest.getPersonList());
+        propertyUpdate.setReservations(propertyRequest.getReservations());
+        return propertyUpdate;
     }
 
 
