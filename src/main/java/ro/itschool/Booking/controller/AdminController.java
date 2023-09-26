@@ -141,7 +141,7 @@ public class AdminController {
 
     @PostMapping(value = "/add-reservation")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Reservation> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws FieldValueException, IncorrectIdException, PersonNotFoundException {
+    public ResponseEntity<Reservation> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws FieldValueException, IncorrectIdException, PersonNotFoundException, IncorrectDateException {
 
         Reservation reservation = reservationService.updateOrSaveReservation(reservationRequestDTO, null);
         return new ResponseEntity<>(reservation, HttpStatus.OK);
@@ -224,7 +224,7 @@ public class AdminController {
 
     @PutMapping(value = "/update-reservation/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Reservation> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long id) throws FieldValueException, IncorrectIdException, PersonNotFoundException {
+    public ResponseEntity<Reservation> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long id) throws FieldValueException, IncorrectIdException, PersonNotFoundException, IncorrectDateException {
 
         Reservation reservation = reservationService.updateOrSaveReservation(reservationRequestDTO, id);
         return new ResponseEntity<>(reservation, HttpStatus.OK);

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.Booking.Dto.ReservationRequestDTO;
 import ro.itschool.Booking.customException.FieldValueException;
+import ro.itschool.Booking.customException.IncorrectDateException;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Reservation;
@@ -52,7 +53,7 @@ public class ReservationController {
 
 
     @PutMapping("/reservation/update/{reservationId}")
-    public Status updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException, FieldValueException {
+    public Status updateReservation(@RequestBody ReservationRequestDTO reservationRequestDTO, @PathVariable Long reservationId) throws IncorrectIdException, PersonNotFoundException, FieldValueException, IncorrectDateException {
         Status status = new Status();
         reservationService.updateOrSaveReservation(reservationRequestDTO, reservationId);
 
@@ -63,7 +64,7 @@ public class ReservationController {
     }
 
     @PostMapping("/reservation")
-    public Status saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
+    public Status saveReservation(@RequestBody ReservationRequestDTO reservationRequestDTO) throws IncorrectIdException, FieldValueException, PersonNotFoundException, IncorrectDateException {
         Status status = new Status();
 
         Reservation reservation = reservationService.updateOrSaveReservation(reservationRequestDTO, null);

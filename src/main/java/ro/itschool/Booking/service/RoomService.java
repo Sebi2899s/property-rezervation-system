@@ -14,6 +14,7 @@ import ro.itschool.Booking.entity.Room;
 import ro.itschool.Booking.entity.RoomReservation;
 import ro.itschool.Booking.repository.RoomRepository;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class RoomService {
     @Lazy
     private RoomReservationService roomReservationService;
 
+    public List<Room> getAllRoomsByAvailability(LocalDate checkIn, LocalDate checkOut){
+        return roomRepository.findAvailableRooms(checkIn,checkOut);
+    }
     public List<Room> allRooms(Integer pageNo,
                                Integer pageSize,
                                String sortBy) {

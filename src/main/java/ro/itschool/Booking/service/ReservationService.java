@@ -15,12 +15,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.Dto.ReservationRequestDTO;
 import ro.itschool.Booking.customException.FieldValueException;
+import ro.itschool.Booking.customException.IncorrectDateException;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Coupon;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.entity.Reservation;
+import ro.itschool.Booking.repository.ExchangeReservationRepository;
 import ro.itschool.Booking.repository.ReservationRepository;
 
 import java.io.IOException;
@@ -42,6 +44,9 @@ public class ReservationService {
     private CouponService couponService;
     @Autowired
     private PropertyService propertyService;
+
+    @Autowired
+    private ExchangeReservationRepository exchangeReservationRepository;
 
     private final double TAX_ADDED = 2.5;
 
@@ -100,7 +105,7 @@ public class ReservationService {
 
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException {
+    public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException, IncorrectDateException {
 
         if (reservationId == null) {
             Person personRq = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
@@ -126,7 +131,10 @@ public class ReservationService {
 
             LocalDate checkOutDateRq = LocalDate.parse(checkOutRq, formatter);
 
-
+            boolean checkForCheckInCheckOutDate = exchangeReservationRepository.checkIfEligibleForExchange(reservationId, checkInDateRq, checkOutDateRq);
+            if (!checkForCheckInCheckOutDate){
+                throw new IncorrectDateException("This date is already reserved");
+            }
             Reservation reservation = Reservation.builder()
                     .person(personRq)
                     .property(propertyRq)

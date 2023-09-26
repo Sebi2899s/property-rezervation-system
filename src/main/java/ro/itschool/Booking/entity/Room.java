@@ -25,4 +25,7 @@ public class Room {
     private boolean bookingEnabled;
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "room")
     private List<RoomReservation> roomReservations;
+
+    @OneToMany(mappedBy = "room")
+    private List<Reservation> reservations;
 }

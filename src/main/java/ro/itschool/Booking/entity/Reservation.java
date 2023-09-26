@@ -43,4 +43,8 @@ public class Reservation {
     private String country;
 
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
 }
