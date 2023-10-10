@@ -12,11 +12,4 @@ public interface ExchangeReservationRepository {
 
     List<Reservation> getEligibleReservationsForExchange(Long appointmentId);
 
-    boolean checkIfExchangeIsPossible(Long oldAppointmentId, Long newAppointmentId, Long userId);
-
-    boolean acceptExchange(Long exchangeId, Long userId);
-
-    boolean rejectExchange(Long exchangeId, Long userId);
-
-    boolean requestExchange(Long oldAppointmentId, Long newAppointmentId, Long userId);
 }

@@ -13,6 +13,8 @@ import ro.itschool.Booking.service.RoomService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ExchangeReservationImpl implements ExchangeReservationRepository {
 
@@ -43,27 +45,23 @@ public class ExchangeReservationImpl implements ExchangeReservationRepository {
     }
 
     @Override
-    public List<Reservation> getEligibleReservationsForExchange(Long appointmentId) {
-        return null;
+    public List<Reservation> getEligibleReservationsForExchange(Long reservationId) {
+
+        // Fetch all reservations
+        List<Reservation> allReservations = reservationRepository.findAll();
+
+        // Filter out reservations that are not eligible for exchange
+        List<Reservation> eligibleReservations = allReservations.stream()
+                .filter(reservation -> {
+                    try {
+                        return checkIfEligibleForExchange(reservationId, reservation.getCheckInDate(), reservation.getCheckOutDate());
+                    } catch (IncorrectIdException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+
+        return eligibleReservations;
     }
 
-    @Override
-    public boolean checkIfExchangeIsPossible(Long oldAppointmentId, Long newAppointmentId, Long userId) {
-        return false;
-    }
-
-    @Override
-    public boolean acceptExchange(Long exchangeId, Long userId) {
-        return false;
-    }
-
-    @Override
-    public boolean rejectExchange(Long exchangeId, Long userId) {
-        return false;
-    }
-
-    @Override
-    public boolean requestExchange(Long oldAppointmentId, Long newAppointmentId, Long userId) {
-        return false;
-    }
 }

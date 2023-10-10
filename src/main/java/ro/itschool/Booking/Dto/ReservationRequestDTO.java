@@ -24,7 +24,8 @@ public class ReservationRequestDTO {
     private String description;
 
     private Long roomReservationId;
-
+    @Nullable
+    private boolean breakfast;
 
 
 }

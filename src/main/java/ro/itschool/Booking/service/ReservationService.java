@@ -51,11 +51,12 @@ public class ReservationService {
     private final double TAX_ADDED = 2.5;
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country) throws IncorrectIdException {
+    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country,boolean breakfastRq) throws IncorrectIdException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
         Coupon coupon = couponService.getCoupon(couponId);
+        Boolean breakfast = breakfastRq;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
         LocalDate checkInDate = LocalDate.parse(checkIn, formatter);
         LocalDate checkOutDate = LocalDate.parse(checkOut, formatter);
@@ -66,6 +67,7 @@ public class ReservationService {
         reservation.setPrice(price);
         reservation.setCoupon(coupon);
         reservation.setCountry(country);
+        reservation.setBreakfastRequested(breakfast);
 
         calculatePriceWithTax(null, checkIn, checkOut, reservation, coupon);
 
@@ -114,7 +116,7 @@ public class ReservationService {
 
             Coupon couponRq = couponService.getCouponOrAnEmpty(reservationRequestDTO.getCouponId());
 
-
+            Boolean breakfastRq= reservationRequestDTO.isBreakfast();
             String checkInRq = reservationRequestDTO.getCheckIn();
 
             String checkOutRq = reservationRequestDTO.getCheckOut();
@@ -130,10 +132,12 @@ public class ReservationService {
             LocalDate checkInDateRq = LocalDate.parse(checkInRq, formatter);
 
             LocalDate checkOutDateRq = LocalDate.parse(checkOutRq, formatter);
+            if (reservationId != null) {
 
-            boolean checkForCheckInCheckOutDate = exchangeReservationRepository.checkIfEligibleForExchange(reservationId, checkInDateRq, checkOutDateRq);
-            if (!checkForCheckInCheckOutDate){
-                throw new IncorrectDateException("This date is already reserved");
+                boolean checkForCheckInCheckOutDate = exchangeReservationRepository.checkIfEligibleForExchange(reservationId, checkInDateRq, checkOutDateRq);
+                if (!checkForCheckInCheckOutDate) {
+                    throw new IncorrectDateException("This date is already reserved");
+                }
             }
             Reservation reservation = Reservation.builder()
                     .person(personRq)
@@ -144,17 +148,22 @@ public class ReservationService {
                     .country(countryRq)
                     .price(priceRq)
                     .description(descriptionRq)
+                    .breakfastRequested(breakfastRq)
                     .build();
 
             calculatePriceWithTax(reservationId, checkInRq, checkOutRq, reservation, couponRq);
 
             return save(reservation);
         } else {
+            Boolean breakfastRq= reservationRequestDTO.isBreakfast();
+            if (breakfastRq==null){
+                throw new FieldValueException("This field:breakfast must have a value in this field!");
+            }
             Long personId;
             if (reservationRequestDTO.getPersonId() != null) {
                 personId = reservationRequestDTO.getPersonId();
             } else {
-                throw new FieldValueException("This field must have a value in this field!");
+                throw new FieldValueException("This field:personId must have a value in this field!");
             }
 
             Long propertyId;
@@ -162,27 +171,27 @@ public class ReservationService {
 
                 propertyId = reservationRequestDTO.getPropertyId();
             } else {
-                throw new FieldValueException("This field must have a value in this field!");
+                throw new FieldValueException("This field:propertyId must have a value in this field!");
             }
             String checkIn;
             if (reservationRequestDTO.getCheckIn() != null) {
                 checkIn = reservationRequestDTO.getCheckIn();
             } else {
-                throw new FieldValueException("This field must have a value in this field!");
+                throw new FieldValueException("This field:check-in must have a value in this field!");
             }
 
             String checkOut;
             if (reservationRequestDTO.getCheckOut() != null) {
                 checkOut = reservationRequestDTO.getCheckOut();
             } else {
-                throw new FieldValueException("This field must have a value in this field!");
+                throw new FieldValueException("This field:check-out must have a value in this field!");
             }
 
             Double price = reservationRequestDTO.getPrice();
             Long couponId = reservationRequestDTO.getCouponId();
             String country = reservationRequestDTO.getCountry();
 
-            return saveReservation(personId, propertyId, checkIn, checkOut, price, couponId, country);
+            return saveReservation(personId, propertyId, checkIn, checkOut, price, couponId, country,breakfastRq);
         }
     }
 
@@ -198,7 +207,7 @@ public class ReservationService {
 
     public Optional<Reservation> getReservationById(Long id) throws IncorrectIdException {
         Optional<Reservation> getReservation = reservationRepository.findById(id);
-        getReservation.orElseThrow(() -> new IncorrectIdException("This is id:" + id + "was not found!"));
+        getReservation.orElseThrow(() -> new IncorrectIdException("This Reservation with id:" + id + "was not found!"));
         return getReservation;
     }
 
@@ -206,7 +215,7 @@ public class ReservationService {
 
     public String deleteReservation(Long id) throws IncorrectIdException {
         if (id == null) {
-            throw new IncorrectIdException("This is id:" + id + " was not found!");
+            throw new IncorrectIdException("This Reservation with id:" + id + "was not found!");
         }
         reservationRepository.deleteById(id);
         return "Reservation with id:" + id + " was deleted";
@@ -317,6 +326,7 @@ public class ReservationService {
 
     //---------------------------------------------------------------------------------------------------------------------
     private void verificationIfCouponIsActiveAndCalculatePrice(Reservation reservation, Coupon coupon, Double totalPrice) {
+        double breakfastCost=reservation.getProperty().getBreakfastCost();
         double finalPrice;
         if (coupon.isUsed()) {
             //getValuePercentageOfDiscount this method return the discount value
@@ -327,9 +337,15 @@ public class ReservationService {
 
             //calculate the price with discount if exists
             finalPrice = finalPrice - (finalPrice * couponDiscount);
+            if (reservation.isBreakfastRequested()==true){
+                finalPrice = finalPrice+breakfastCost;
+            }
             reservation.setPrice(finalPrice);
         } else {
             finalPrice = totalPrice - ((TAX_ADDED / 100) * totalPrice);
+            if (reservation.isBreakfastRequested()==true){
+                finalPrice = finalPrice+breakfastCost;
+            }
             reservation.setPrice(finalPrice);
         }
     }

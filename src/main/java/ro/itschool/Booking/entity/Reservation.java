@@ -44,6 +44,8 @@ public class Reservation {
 
     private String description;
 
+    private boolean breakfastRequested;
+
     @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;
