@@ -53,7 +53,7 @@ public class Property implements CloneProperty {
         this.propertyAddress = propertyAddress;
         this.price = price;
         this.description=description;
-        this.hasBreakfast=isHasBreakfast();
+        this.hasBreakfast=hasBreakfast;
     }
 
     public Property(Property property) {

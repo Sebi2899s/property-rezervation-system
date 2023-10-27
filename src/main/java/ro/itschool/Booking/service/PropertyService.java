@@ -195,7 +195,7 @@ public class PropertyService {
     public Optional<PropertyDTO> checkIfIdExistsConvertToDto(Long id) {
         Optional<Property> idExists = propertyRepository.findById(id);
         if (idExists.isEmpty()) {
-            throw new IllegalStateException("This id " + id + " is not found");
+            throw new IllegalStateException("This property with id: " + id + " is not found");
         }
         return idExists.map(Property::toDTO);
     }
