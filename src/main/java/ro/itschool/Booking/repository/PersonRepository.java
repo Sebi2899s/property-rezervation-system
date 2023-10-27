@@ -26,9 +26,11 @@ public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecif
     // will find all persons that have reservation on a property based on property name
     @Query(value = "SELECT * FROM person " +
             "JOIN property ON property.id = person.property_id " +
-            "WHERE property.property_name = :propertyName",nativeQuery = true)
+            "WHERE property.property_name = :propertyName", nativeQuery = true)
     List<Person> getAllPersonsByPropertiesName(String propertyName);
+
     @Query(value = "SELECT * FROM person WHERE LOWER(person.first_name) LIKE LOWER(%:name%)", nativeQuery = true)
     List<Person> getPersonsByFirstName(@Param("name") String name);
 
+    Person findFirstByEmail(String email);
 }

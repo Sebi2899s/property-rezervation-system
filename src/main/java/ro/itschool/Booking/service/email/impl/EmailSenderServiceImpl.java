@@ -1,5 +1,6 @@
 package ro.itschool.Booking.service.email.impl;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +25,7 @@ public class EmailSenderServiceImpl implements EmailBodyService {
     }
 
 
-    public void sendEmail(String email, String content, String subject) {
+    public void sendEmail(@NonNull String email, String content, String subject) {
 
 
         try {

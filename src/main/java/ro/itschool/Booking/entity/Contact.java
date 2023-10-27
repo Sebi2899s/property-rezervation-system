@@ -40,5 +40,12 @@ public class Contact {
 
     private String phoneNumber;
 
+    private String body;
+
+    private String subject;
+    @ManyToOne
+    @JoinColumn(name = "person_id")
+    private Person person;
+
 
 }
