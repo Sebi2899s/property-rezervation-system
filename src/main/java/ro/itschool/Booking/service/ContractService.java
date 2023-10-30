@@ -53,6 +53,8 @@ public class ContractService {
         contact.setLastName(contactDetails.getLastName());
         contact.setEmail(contactDetails.getEmail());
         contact.setPhoneNumber(contactDetails.getPhoneNumber());
+        contact.setBody(contactDetails.getBody());
+        contact.setSubject(contactDetails.getSubject());
         return contactRepository.save(contact);
     }
 
