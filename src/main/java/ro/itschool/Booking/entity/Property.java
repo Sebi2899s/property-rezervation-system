@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.util.CloneProperty;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -34,6 +36,9 @@ public class Property implements CloneProperty {
 
     private boolean hasBreakfast;
     private double breakfastCost;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private List<LocalDate> blockedDates;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "property")
@@ -131,5 +136,13 @@ public class Property implements CloneProperty {
             return this.property;
         }
 
+    }
+
+    public List<LocalDate> getBlockedDates() {
+        return blockedDates;
+    }
+
+    public void setBlockedDates(List<LocalDate> blockedDates) {
+        this.blockedDates = blockedDates;
     }
 }

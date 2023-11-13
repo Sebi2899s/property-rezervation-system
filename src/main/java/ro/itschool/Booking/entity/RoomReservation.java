@@ -23,6 +23,10 @@ public class RoomReservation {
     @JoinColumn(name = "person_id")
     @JsonIgnore
     private Person person;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "property_id")
+    @JsonIgnore
+    private Property property;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")

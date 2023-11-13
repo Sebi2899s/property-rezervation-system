@@ -14,10 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.Dto.ReservationRequestDTO;
-import ro.itschool.Booking.customException.FieldValueException;
-import ro.itschool.Booking.customException.IncorrectDateException;
-import ro.itschool.Booking.customException.IncorrectIdException;
-import ro.itschool.Booking.customException.PersonNotFoundException;
+import ro.itschool.Booking.customException.*;
 import ro.itschool.Booking.entity.Coupon;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.entity.Property;
@@ -51,7 +48,7 @@ public class ReservationService {
     private final double TAX_ADDED = 2.5;
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country,boolean breakfastRq) throws IncorrectIdException {
+    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country,boolean breakfastRq) throws IncorrectIdException, BlockedDaysException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
@@ -68,7 +65,12 @@ public class ReservationService {
         reservation.setCoupon(coupon);
         reservation.setCountry(country);
         reservation.setBreakfastRequested(breakfast);
-
+        boolean canReserve = propertyService.canReserve(reservation);
+        if (!canReserve) {
+            throw new BlockedDaysException("You cannot make a reservation on these days.");
+        }else {
+            reservation.setCanReserve(true);
+        }
         calculatePriceWithTax(null, checkIn, checkOut, reservation, coupon);
 
         return reservationRepository.save(reservation);
@@ -107,7 +109,7 @@ public class ReservationService {
 
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException, IncorrectDateException {
+    public Reservation updateOrSaveReservation(@NotNull ReservationRequestDTO reservationRequestDTO, @Nullable Long reservationId) throws IncorrectIdException, FieldValueException, PersonNotFoundException, IncorrectDateException, BlockedDaysException {
 
         if (reservationId == null) {
             Person personRq = personService.getPersonOrThrow(reservationRequestDTO.getPersonId());
@@ -152,7 +154,12 @@ public class ReservationService {
                     .build();
 
             calculatePriceWithTax(reservationId, checkInRq, checkOutRq, reservation, couponRq);
-
+            boolean canReserve = propertyService.canReserve(reservation);
+            if (!canReserve){
+                throw new BlockedDaysException("You cannot make a reservation on these days.");
+            }else {
+                reservation.setCanReserve(true);
+            }
             return save(reservation);
         } else {
             Boolean breakfastRq= reservationRequestDTO.isBreakfast();

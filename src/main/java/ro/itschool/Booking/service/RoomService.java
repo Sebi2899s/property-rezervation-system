@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ro.itschool.Booking.Dto.RoomRequest;
 import ro.itschool.Booking.customException.IncorrectIdException;
-import ro.itschool.Booking.entity.Reminder;
 import ro.itschool.Booking.entity.Room;
 import ro.itschool.Booking.entity.RoomReservation;
 import ro.itschool.Booking.repository.RoomRepository;
@@ -68,7 +67,7 @@ public class RoomService {
         room.setRoomReservations(roomReservationList);
         room.setType(roomRq.getType());
         room.setDescription(roomRq.getDescription());
-        room.setBookingEnabled(roomRq.isBookingEnabled());
+        room.setBookingEnabledForReservation(roomRq.isBookingEnabled());
         return saveRoom(room);
     }
 

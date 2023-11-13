@@ -18,12 +18,17 @@ import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
+import ro.itschool.Booking.entity.Reservation;
 import ro.itschool.Booking.repository.PropertyRepository;
 import ro.itschool.Booking.specifications.PropertyTypeAndNameRequest;
 import ro.itschool.Booking.specifications.QuerySpecificationsDao;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //@Service
 @Service
@@ -213,6 +218,26 @@ public class PropertyService {
     }
 
     //---------------------------------------------------------------------------------------------------------------------
+
+    public static Specification<Property> getPropertyByPropertyType(String propertyType) {
+        Specification<Property> propertySpecification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("propertyType"), propertyType);
+        return propertySpecification;
+    }
+
+    public boolean canReserve(Reservation reservation){
+        List<LocalDate> existingBlockedDates = reservation.getProperty().getBlockedDates();
+        List<LocalDate> datesBetweenCheckInAndCheckOut= getDatesBetween(reservation.getCheckInDate(),reservation.getCheckOutDate());
+        if (existingBlockedDates.stream().anyMatch(datesBetweenCheckInAndCheckOut::contains)){
+            return false;
+        }else {
+            return true;
+        }
+    }
+    private static List<LocalDate> getDatesBetween(LocalDate checkIn, LocalDate CheckOut) {
+        return Stream.iterate(checkIn, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(checkIn, CheckOut))
+                .collect(Collectors.toList());
+    }
     //method that check if email exists
     private void propertyEmailExistsCheck(Property property) {
         Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
@@ -221,8 +246,4 @@ public class PropertyService {
         }
     }
 
-    public static Specification<Property> getPropertyByPropertyType(String propertyType) {
-        Specification<Property> propertySpecification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("propertyType"), propertyType);
-        return propertySpecification;
-    }
 }
