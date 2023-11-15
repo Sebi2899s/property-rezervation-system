@@ -207,6 +207,7 @@ public class PersonService {
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
         workbook.write(outputStream);
         outputStream.close();
+        
     }
 
     //---------------------------------------------------------------------------------------------------------------------
