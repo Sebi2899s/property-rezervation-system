@@ -67,10 +67,10 @@ public class PersonService {
 //\---------------------------------------------------------------------------------------------------------------------
 
     public Person getByIdPerson(Long id) {
-        if (id==null){
+        if (id == null) {
             throw new RuntimeException("This id must not be null");
         }
-        return personRepository.findById(id).get();
+        return personRepository.findById(id).orElse(new Person());
     }
 
 
@@ -167,25 +167,14 @@ public class PersonService {
 //---------------------------------------------------------------------------------------------------------------------
 
     public Optional<Person> findByEmail(String email) {
-        Optional<Person> getEmail = personRepository.findByEmail(email);
-        if (getEmail != null) {
-
-            return getEmail;
-        } else {
-            return getEmail = null;
-        }
+        return Optional.ofNullable(personRepository.findByEmail(email).orElse(new Person()));
     }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 
     public Optional<Person> findById(Long id) {
-        Optional<Person> findByPersonId = personRepository.findById(id);
-        if (findByPersonId != null) {
-            return findByPersonId;
-        } else {
-            return null;
-        }
+        return personRepository.findById(id);
 
     }
 
@@ -237,6 +226,7 @@ public class PersonService {
             return savePerson(person);
         }
     }
+
     public List<Person> getPropertyByPersonFirstName(String propertyName) {
 
         return personRepository.getAllPersonsByPropertiesName(propertyName);
@@ -249,7 +239,8 @@ public class PersonService {
         }
         return personList;
     }
-    public List<Person> getPersonNameAndRole(PersonRoleAndFirstNameRequest personRoleAndFirstNameRequest){
+
+    public List<Person> getPersonNameAndRole(PersonRoleAndFirstNameRequest personRoleAndFirstNameRequest) {
         return querySpecificationsDao.getAllPersonByFirstNameOrMobileNumber(personRoleAndFirstNameRequest);
     }
 }
