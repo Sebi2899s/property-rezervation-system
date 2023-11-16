@@ -86,10 +86,6 @@ public class CouponService {
 
     public List<Coupon> getAllCoupons() {
         List<Coupon> allCoupons = couponRepository.findAll();
-        if (allCoupons.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return allCoupons;
-        }
+        return allCoupons.isEmpty() ? new ArrayList<>() : allCoupons;
     }
 }

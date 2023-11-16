@@ -48,7 +48,7 @@ public class ReservationService {
     private final double TAX_ADDED = 2.5;
 
     //---------------------------------------------------------------------------------------------------------------------
-    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country,boolean breakfastRq) throws IncorrectIdException, BlockedDaysException {
+    public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country, boolean breakfastRq) throws IncorrectIdException, BlockedDaysException {
         Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
@@ -68,7 +68,7 @@ public class ReservationService {
         boolean canReserve = propertyService.canReserve(reservation);
         if (!canReserve) {
             throw new BlockedDaysException("You cannot make a reservation on these days.");
-        }else {
+        } else {
             reservation.setCanReserve(true);
         }
         calculatePriceWithTax(null, checkIn, checkOut, reservation, coupon);
@@ -118,7 +118,7 @@ public class ReservationService {
 
             Coupon couponRq = couponService.getCouponOrAnEmpty(reservationRequestDTO.getCouponId());
 
-            Boolean breakfastRq= reservationRequestDTO.isBreakfast();
+            Boolean breakfastRq = reservationRequestDTO.isBreakfast();
             String checkInRq = reservationRequestDTO.getCheckIn();
 
             String checkOutRq = reservationRequestDTO.getCheckOut();
@@ -155,15 +155,15 @@ public class ReservationService {
 
             calculatePriceWithTax(reservationId, checkInRq, checkOutRq, reservation, couponRq);
             boolean canReserve = propertyService.canReserve(reservation);
-            if (!canReserve){
+            if (!canReserve) {
                 throw new BlockedDaysException("You cannot make a reservation on these days.");
-            }else {
+            } else {
                 reservation.setCanReserve(true);
             }
             return save(reservation);
         } else {
-            Boolean breakfastRq= reservationRequestDTO.isBreakfast();
-            if (breakfastRq==null){
+            Boolean breakfastRq = reservationRequestDTO.isBreakfast();
+            if (breakfastRq == null) {
                 throw new FieldValueException("This field:breakfast must have a value in this field!");
             }
             Long personId;
@@ -198,7 +198,7 @@ public class ReservationService {
             Long couponId = reservationRequestDTO.getCouponId();
             String country = reservationRequestDTO.getCountry();
 
-            return saveReservation(personId, propertyId, checkIn, checkOut, price, couponId, country,breakfastRq);
+            return saveReservation(personId, propertyId, checkIn, checkOut, price, couponId, country, breakfastRq);
         }
     }
 
@@ -234,11 +234,7 @@ public class ReservationService {
     public List<Reservation> getAllReservations() {
 
         List<Reservation> allReservation = reservationRepository.findAll();
-        if (allReservation == null) {
-            return new ArrayList<>();
-        } else {
-            return allReservation;
-        }
+        return allReservation.isEmpty() ? new ArrayList<>() : allReservation;
     }
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -248,11 +244,7 @@ public class ReservationService {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 
         Page<Reservation> pagedResult = reservationRepository.findAll(paging);
-        if (pagedResult.hasContent()) {
-            return pagedResult.getContent();
-        } else {
-            return new ArrayList<Reservation>();
-        }
+       return pagedResult.hasContent() ? pagedResult.getContent() : new ArrayList<>();
     }
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -333,7 +325,7 @@ public class ReservationService {
 
     //---------------------------------------------------------------------------------------------------------------------
     private void verificationIfCouponIsActiveAndCalculatePrice(Reservation reservation, Coupon coupon, Double totalPrice) {
-        double breakfastCost=reservation.getProperty().getBreakfastCost();
+        double breakfastCost = reservation.getProperty().getBreakfastCost();
         double finalPrice;
         if (coupon.isUsed()) {
             //getValuePercentageOfDiscount this method return the discount value
@@ -344,14 +336,14 @@ public class ReservationService {
 
             //calculate the price with discount if exists
             finalPrice = finalPrice - (finalPrice * couponDiscount);
-            if (reservation.isBreakfastRequested()==true){
-                finalPrice = finalPrice+breakfastCost;
+            if (reservation.isBreakfastRequested() == true) {
+                finalPrice = finalPrice + breakfastCost;
             }
             reservation.setPrice(finalPrice);
         } else {
             finalPrice = totalPrice - ((TAX_ADDED / 100) * totalPrice);
-            if (reservation.isBreakfastRequested()==true){
-                finalPrice = finalPrice+breakfastCost;
+            if (reservation.isBreakfastRequested() == true) {
+                finalPrice = finalPrice + breakfastCost;
             }
             reservation.setPrice(finalPrice);
         }

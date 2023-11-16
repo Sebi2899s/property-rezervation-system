@@ -239,10 +239,7 @@ public class PersonService {
 
     public List<Person> getPropertyByNameFilter(String name) {
         List<Person> personList = personRepository.getPersonsByFirstName(name);
-        if (personList.isEmpty() || personList == null) {
-            return new ArrayList<>();
-        }
-        return personList;
+        return (personList.isEmpty() && personList == null) ? new ArrayList<>() : personList;
     }
 
     public List<Person> getPersonNameAndRole(PersonRoleAndFirstNameRequest personRoleAndFirstNameRequest) {

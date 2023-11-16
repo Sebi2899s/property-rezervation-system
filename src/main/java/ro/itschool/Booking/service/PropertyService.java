@@ -70,11 +70,7 @@ public class PropertyService {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 
         Page<Property> pagedResult = propertyRepository.findAll(paging);
-        if (pagedResult.hasContent()) {
-            return pagedResult.getContent();
-        } else {
-            return new ArrayList<Property>();
-        }
+        return pagedResult.hasContent() ? pagedResult.getContent() : new ArrayList<>();
     }
 
 
@@ -159,7 +155,6 @@ public class PropertyService {
     }
 
 
-
     //---------------------------------------------------------------------------------------------------------------------
     //UPDATE
     public Property updateProperty(Long id, Property propertyRequest) throws IncorrectIdException {
@@ -224,20 +219,22 @@ public class PropertyService {
         return propertySpecification;
     }
 
-    public boolean canReserve(Reservation reservation){
+    public boolean canReserve(Reservation reservation) {
         List<LocalDate> existingBlockedDates = reservation.getProperty().getBlockedDates();
-        List<LocalDate> datesBetweenCheckInAndCheckOut= getDatesBetween(reservation.getCheckInDate(),reservation.getCheckOutDate());
-        if (existingBlockedDates.stream().anyMatch(datesBetweenCheckInAndCheckOut::contains)){
+        List<LocalDate> datesBetweenCheckInAndCheckOut = getDatesBetween(reservation.getCheckInDate(), reservation.getCheckOutDate());
+        if (existingBlockedDates.stream().anyMatch(datesBetweenCheckInAndCheckOut::contains)) {
             return false;
-        }else {
+        } else {
             return true;
         }
     }
+
     private static List<LocalDate> getDatesBetween(LocalDate checkIn, LocalDate CheckOut) {
         return Stream.iterate(checkIn, date -> date.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(checkIn, CheckOut))
                 .collect(Collectors.toList());
     }
+
     //method that check if email exists
     private void propertyEmailExistsCheck(Property property) {
         Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());

@@ -8,6 +8,7 @@ import ro.itschool.Booking.repository.FacilityTypeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 public class FacilityTypeService {
     @Autowired
@@ -15,11 +16,7 @@ public class FacilityTypeService {
 
     public List<FacilityType> getAllFacilitiesType() {
         List<FacilityType> facilityTypeList = facilityTypeRepository.findAll();
-        if (facilityTypeList == null) {
-            return new ArrayList<>();
-        } else {
-            return facilityTypeList;
-        }
+        return facilityTypeList.isEmpty() ? new ArrayList<>() : facilityTypeList;
     }
 
     public FacilityType getFacilityTypeById(Long id) throws IncorrectIdException {

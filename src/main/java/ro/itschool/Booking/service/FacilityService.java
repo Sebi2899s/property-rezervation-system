@@ -9,7 +9,6 @@ import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.Facility;
 import ro.itschool.Booking.entity.FacilityType;
 import ro.itschool.Booking.repository.FacilityRepository;
-import ro.itschool.Booking.repository.FacilityTypeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +21,7 @@ public class FacilityService {
 
     public List<Facility> getAllFacilities() {
         List<Facility> allFacilities = facilityRepository.findAll();
-        if (allFacilities == null) {
-            return new ArrayList<>();
-        } else {
-            return allFacilities;
-        }
+        return allFacilities.isEmpty() ? new ArrayList<>() : allFacilities;
     }
     public Facility getFacilityById(Long id) throws IncorrectIdException {
         Facility facility = facilityRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + id + " doesn't find any facility !"));
