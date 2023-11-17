@@ -86,10 +86,6 @@ public class PersonService {
     }
 
 
-
-
-    
-
 //---------------------------------------------------------------------------------------------------------------------
 
 
@@ -207,7 +203,7 @@ public class PersonService {
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
         workbook.write(outputStream);
         outputStream.close();
-        
+
     }
 
     //---------------------------------------------------------------------------------------------------------------------
@@ -217,16 +213,7 @@ public class PersonService {
         } else {
             Person person = findById(personId).get();
             if (person != null) {
-                person.setEmail(personRequest.getEmail());
-                person.setPersonId(personRequest.getPersonId());
-                person.setLastName(personRequest.getLastName());
-                person.setFirstName(personRequest.getFirstName());
-                person.setProperty(personRequest.getProperty());
-                person.setPassword(personRequest.getPassword());
-                person.setMobileNumber(personRequest.getMobileNumber());
-                person.setReservations(personRequest.getReservations());
-                person.setSubscriber(personRequest.isSubscriber());
-
+                mapper.map(personRequest, person);
             }
             return savePerson(person);
         }

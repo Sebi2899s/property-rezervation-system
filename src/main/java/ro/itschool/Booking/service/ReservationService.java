@@ -49,7 +49,6 @@ public class ReservationService {
 
     //---------------------------------------------------------------------------------------------------------------------
     public Reservation saveReservation(Long personId, Long propertyId, String checkIn, String checkOut, Double price, @Nullable Long couponId, String country, boolean breakfastRq) throws IncorrectIdException, BlockedDaysException {
-        Reservation reservation = new Reservation();
         Person person = personService.findById(personId).get();
         Property property = propertyService.findById(propertyId).get();
         Coupon coupon = couponService.getCoupon(couponId);
@@ -57,14 +56,7 @@ public class ReservationService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu/MM/dd");
         LocalDate checkInDate = LocalDate.parse(checkIn, formatter);
         LocalDate checkOutDate = LocalDate.parse(checkOut, formatter);
-        reservation.setCheckOutDate(checkOutDate);
-        reservation.setCheckInDate(checkInDate);
-        reservation.setProperty(property);
-        reservation.setPerson(person);
-        reservation.setPrice(price);
-        reservation.setCoupon(coupon);
-        reservation.setCountry(country);
-        reservation.setBreakfastRequested(breakfast);
+        Reservation reservation = new Reservation(person,property,checkInDate,checkOutDate,price,coupon,country,breakfast);
         boolean canReserve = propertyService.canReserve(reservation);
         if (!canReserve) {
             throw new BlockedDaysException("You cannot make a reservation on these days.");

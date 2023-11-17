@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,10 +38,13 @@ public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final QuerySpecificationsDao querySpecificationsDao;
 
+    private final ModelMapper mapper;
 
-    public PropertyService(PropertyRepository propertyRepository, QuerySpecificationsDao querySpecificationsDao) {
+
+    public PropertyService(PropertyRepository propertyRepository, QuerySpecificationsDao querySpecificationsDao, ModelMapper mapper) {
         this.propertyRepository = propertyRepository;
         this.querySpecificationsDao = querySpecificationsDao;
+        this.mapper = mapper;
     }
 
 
@@ -160,16 +164,7 @@ public class PropertyService {
     public Property updateProperty(Long id, Property propertyRequest) throws IncorrectIdException {
         Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + id + "is not found! "));
         propertyEmailExistsCheck(propertyRequest);
-
-        propertyUpdate.setPropertyName(propertyRequest.getPropertyName());
-        propertyUpdate.setPropertyLocation(propertyRequest.getPropertyLocation());
-        propertyUpdate.setPropertyAddress(propertyRequest.getPropertyAddress());
-        propertyUpdate.setPropertyType(propertyRequest.getPropertyType());
-        propertyUpdate.setDescription(propertyRequest.getDescription());
-        propertyUpdate.setPropertyLocation(propertyRequest.getPropertyLocation());
-        propertyUpdate.setPrice(propertyRequest.getPrice());
-        propertyUpdate.setPersonList(propertyRequest.getPersonList());
-        propertyUpdate.setReservations(propertyRequest.getReservations());
+        mapper.map(propertyRequest,propertyUpdate);
         return propertyUpdate;
     }
 
@@ -221,10 +216,15 @@ public class PropertyService {
 
     public boolean canReserve(Reservation reservation) {
         List<LocalDate> existingBlockedDates = reservation.getProperty().getBlockedDates();
-        List<LocalDate> datesBetweenCheckInAndCheckOut = getDatesBetween(reservation.getCheckInDate(), reservation.getCheckOutDate());
-        if (existingBlockedDates.stream().anyMatch(datesBetweenCheckInAndCheckOut::contains)) {
-            return false;
-        } else {
+        if (existingBlockedDates != null && !existingBlockedDates.isEmpty()) {
+            List<LocalDate> datesBetweenCheckInAndCheckOut = getDatesBetween(reservation.getCheckInDate(), reservation.getCheckOutDate());
+            if (existingBlockedDates.stream().anyMatch(datesBetweenCheckInAndCheckOut::contains)) {
+                return false;
+            } else {
+                return true;
+            }
+        }else
+        {
             return true;
         }
     }

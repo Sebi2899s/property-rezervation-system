@@ -2,6 +2,7 @@ package ro.itschool.Booking.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +28,8 @@ public class ReminderService {
     private ReminderRepository reminderRepository;
     @Autowired
     private ReservationRepository reservationRepository;
-
+    @Autowired
+    private ModelMapper mapper;
 
     public List<Reminder> getReminders(Integer pageNo,
                                        Integer pageSize,
@@ -92,12 +94,7 @@ public class ReminderService {
 
     public Reminder updateReminder(Long reminderId, Reminder reminderRq) throws IncorrectIdException {
         Reminder reminder = getReminderByIdOrThrow(reminderId);
-        reminder.setBody(reminderRq.getBody());
-        reminder.setAction(reminderRq.getAction());
-        reminder.setDateDue(reminderRq.getDateDue());
-        reminder.setAction(reminderRq.getAction());
-        reminder.setReservation(reminder.getReservation());
-
+        mapper.map(reminderRq, reminder);
 
         return reminder;
     }
