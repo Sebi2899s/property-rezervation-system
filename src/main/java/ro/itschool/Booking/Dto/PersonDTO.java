@@ -1,12 +1,9 @@
-package ro.itschool.Booking.DtoEntity;
+package ro.itschool.Booking.Dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ro.itschool.Booking.entity.Person;
-
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +16,7 @@ public class PersonDTO {
     private String lastName;
 
     private String email;
-
+    private boolean subscriber;
 
     private String mobileNumber;
 
@@ -31,6 +28,6 @@ public class PersonDTO {
     }
 
     public Person toEntity() {
-        return new Person(personId, firstName, lastName, email, mobileNumber);
+        return new Person(personId, firstName, lastName, email, mobileNumber, subscriber);
     }
 }

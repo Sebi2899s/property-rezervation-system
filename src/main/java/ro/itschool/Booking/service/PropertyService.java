@@ -8,41 +8,77 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-import ro.itschool.Booking.entity.Person;
+import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.entity.Property;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
+import ro.itschool.Booking.entity.Reservation;
 import ro.itschool.Booking.repository.PropertyRepository;
-import ro.itschool.Booking.specifications.Specifications;
+import ro.itschool.Booking.specifications.PropertyTypeAndNameRequest;
+import ro.itschool.Booking.specifications.QuerySpecificationsDao;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //@Service
 @Service
 public class PropertyService {
     //dependency injection
     private final PropertyRepository propertyRepository;
+    private final QuerySpecificationsDao querySpecificationsDao;
 
-    public PropertyService(PropertyRepository propertyRepository) {
+    private final ModelMapper mapper;
+
+
+    public PropertyService(PropertyRepository propertyRepository, QuerySpecificationsDao querySpecificationsDao, ModelMapper mapper) {
         this.propertyRepository = propertyRepository;
+        this.querySpecificationsDao = querySpecificationsDao;
+        this.mapper = mapper;
     }
 
 
+    //---------------------------------------------------------------------------------------------------------------------
     public List<Property> getPropertiesByNameAndSortedAlphabetically(String name) {
         List<Property> properties = propertyRepository.getPropertyNameAndFilter(name).orElseThrow(() -> new RuntimeException("There no properties with this name"));
         properties.sort(Comparator.comparing(Property::getPropertyName));
         return properties;
     }
 
-    //GET
-    public List<Property> getAllProperties() {
-        return propertyRepository.findAll();
+    //-------------------------------------------------------------------------------------------------------------------
+//get property by name without sorting
+    public List<Property> getPropertyByNameFilter(String name) {
+        List<Property> properties = propertyRepository.getPropertyByName(name);
+        if (properties.isEmpty() || properties == null) {
+            return new ArrayList<>();
+        }
+        return properties;
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
+    //GET
+    public List<Property> getAllProperties(Integer pageNo,
+                                           Integer pageSize,
+                                           String sortBy) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+
+        Page<Property> pagedResult = propertyRepository.findAll(paging);
+        return pagedResult.hasContent() ? pagedResult.getContent() : new ArrayList<>();
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     //GET by property name
     public List<Property> getByPropertyName(String propertyName) throws IncorretNameException {
         if (propertyName == null) {
@@ -51,42 +87,35 @@ public class PropertyService {
             return propertyRepository.findByPropertyName(propertyName);
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Property getPropertyOrThrow(Long id) {
         Optional<Property> property = findById(id);
         return property.orElseThrow(() -> new PropertyNotFoundException("Property with this id" + id + "was not found!"));
     }
 
-    //get property by property type using query specification
-    public List<Property> getPropertyByPropertyType(String propertyTipe) {
-        Specification<Property> propertySpecification = Specifications.getPropertyByPropertyType(propertyTipe);
-        return propertyRepository.findAll(propertySpecification);
+
+    //---------------------------------------------------------------------------------------------------------------------
+
+    public List<Property> getPropertiesByType(String propertyType) {
+        List<Property> allByPropertyType = propertyRepository.findAllByPropertyType(propertyType);
+        return allByPropertyType;
     }
 
-    //get property where person have the following first name
-    public List<Property> getPropertyByPersonFirstName(String firstName) {
-        Specification<Property> specifications = Specifications.getPropertyByPersonFirstName(firstName);
-        return propertyRepository.findAll(specifications);
-    }
 
-    public List<Property> searchByPropertyNameOrPropertyEmail(@Param("propertyName") String propertyName,
-                                                              @Param("propertyEmail") String propertyEmail) {
-        List<Property> propertyList = new ArrayList<>();
-        propertyList.addAll(propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail).isEmpty() ? null : propertyRepository.searchPropertyNameOrPropertyEmail(propertyName, propertyEmail));
-
-        return propertyList;
-
-    }
-
-    //excel of all persons
+    //---------------------------------------------------------------------------------------------------------------------
+    //excel file report of all persons
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
         List<Property> propertyList = propertyRepository.findAll();
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("List With Properties");
         HSSFRow row = sheet.createRow(0);
         row.createCell(0).setCellValue("ID");
-        row.createCell(0).setCellValue("Property Name");
-        row.createCell(0).setCellValue("Property Email");
-        row.createCell(0).setCellValue("Property Address");
+        row.createCell(1).setCellValue("Property Name");
+        row.createCell(2).setCellValue("Property Email");
+        row.createCell(3).setCellValue("Property Address");
+        row.createCell(4).setCellValue("Price");
+        row.createCell(5).setCellValue("Description");
 
         int dataRowIndex = 1;
         for (Property property : propertyList) {
@@ -95,6 +124,8 @@ public class PropertyService {
             dataRow.createCell(1).setCellValue(property.getPropertyName());
             dataRow.createCell(2).setCellValue(property.getPropertyEmail());
             dataRow.createCell(3).setCellValue(property.getPropertyAddress());
+            dataRow.createCell(4).setCellValue(property.getPrice());
+            dataRow.createCell(5).setCellValue(property.getDescription());
             dataRowIndex++;
         }
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
@@ -102,59 +133,43 @@ public class PropertyService {
         outputStream.close();
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //POST
-    public Property createProperty(Property property) {
-        Property save = null;
-        if (property == null) {
-            propertyEmailExistsCheck(property);
+    public Property createProperty(Property property_p) {
+        Property property = null;
+        if (property_p == null) {
+            propertyEmailExistsCheck(property_p);
+            property = property_p;
         } else {
-            save = propertyRepository.save(property);
+            property = property_p;
         }
-        return save;
+        return propertyRepository.save(property);
     }
 
-    public Property createOrUpdateProperty(@NotNull Property property_p, @Nullable Long id) {
-        Property property;
-        String sMessage = null;
-        //update case
-        if (id != null) {
-            property = getPropertyOrThrow(id);
-            sMessage = "Error in updating property";
+
+    //---------------------------------------------------------------------------------------------------------------------
+    public Property updateOrSaveProperty(@NotNull Property propertyRequest, @Nullable Long propertyId) throws IncorrectIdException {
+        if (propertyId == null) {
+            return createProperty(propertyRequest);
         } else {
-            property_p.setId(null);
-            sMessage = "Error in saving property";
-        }
-        try {
-
-            property = createProperty(property_p);
-        } catch (Exception e) {
-            throw new RuntimeException(sMessage);
-        }
-        return property;
-    }
-
-
-    //method that check if email exists
-    private void propertyEmailExistsCheck(Property property) {
-        Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
-        if (propertyOptional.isPresent()) {
-            throw new IllegalStateException(String.format("This email %s already exists", property.getPropertyEmail()));
+            Property property = updateProperty(propertyId, propertyRequest);
+            return createProperty(property);
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //UPDATE
-    public void updateProperty(Long id, Property property) throws IncorrectIdException {
-        Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + property.getId() + "is not found! "));
-        propertyEmailExistsCheck(property);
-
-        propertyUpdate.setId(property.getId());
-        propertyUpdate.setPropertyName(property.getPropertyName());
-        propertyUpdate.setPropertyEmail(property.getPropertyEmail());
-        propertyUpdate.setPropertyLocation(property.getPropertyLocation());
-        propertyUpdate.setPropertyAddress(property.getPropertyAddress());
-        propertyUpdate.setPropertyType(property.getPropertyType());
+    public Property updateProperty(Long id, Property propertyRequest) throws IncorrectIdException {
+        Property propertyUpdate = propertyRepository.findById(id).orElseThrow(() -> new IncorrectIdException("This id" + id + "is not found! "));
+        propertyEmailExistsCheck(propertyRequest);
+        mapper.map(propertyRequest,propertyUpdate);
+        return propertyUpdate;
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //DELETE
     public void deleteProperty(Long id) {
         Optional<Property> person = propertyRepository.findById(id);
@@ -164,12 +179,68 @@ public class PropertyService {
             propertyRepository.deleteById(id);
         }
     }
+//---------------------------------------------------------------------------------------------------------------------
 
+    public List<Property> getPropertiesByTypeAndName(PropertyTypeAndNameRequest propertyTypeAndNameRequest) {
+        return querySpecificationsDao.getAllPropertyByTypeAndName(propertyTypeAndNameRequest);
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------------
+    public Optional<PropertyDTO> checkIfIdExistsConvertToDto(Long id) {
+        Optional<Property> idExists = propertyRepository.findById(id);
+        if (idExists.isEmpty()) {
+            throw new IllegalStateException("This property with id: " + id + " is not found");
+        }
+        return idExists.map(Property::toDTO);
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Optional<Property> findByPropertyEmail(String propertyEmail) {
         return propertyRepository.findByPropertyEmail(propertyEmail);
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     public Optional<Property> findById(Long id) {
         return propertyRepository.findById(id);
     }
+
+    //---------------------------------------------------------------------------------------------------------------------
+
+    public static Specification<Property> getPropertyByPropertyType(String propertyType) {
+        Specification<Property> propertySpecification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("propertyType"), propertyType);
+        return propertySpecification;
+    }
+
+    public boolean canReserve(Reservation reservation) {
+        List<LocalDate> existingBlockedDates = reservation.getProperty().getBlockedDates();
+        if (existingBlockedDates != null && !existingBlockedDates.isEmpty()) {
+            List<LocalDate> datesBetweenCheckInAndCheckOut = getDatesBetween(reservation.getCheckInDate(), reservation.getCheckOutDate());
+            if (existingBlockedDates.stream().anyMatch(datesBetweenCheckInAndCheckOut::contains)) {
+                return false;
+            } else {
+                return true;
+            }
+        }else
+        {
+            return true;
+        }
+    }
+
+    private static List<LocalDate> getDatesBetween(LocalDate checkIn, LocalDate CheckOut) {
+        return Stream.iterate(checkIn, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(checkIn, CheckOut))
+                .collect(Collectors.toList());
+    }
+
+    //method that check if email exists
+    private void propertyEmailExistsCheck(Property property) {
+        Optional<Property> propertyOptional = propertyRepository.getPropertyByPropertyEmail(property.getPropertyEmail());
+        if (propertyOptional.isPresent()) {
+            throw new IllegalStateException(String.format("This email %s already exists", property.getPropertyEmail()));
+        }
+    }
+
 }

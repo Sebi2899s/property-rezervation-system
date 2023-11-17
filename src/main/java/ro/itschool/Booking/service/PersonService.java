@@ -1,22 +1,28 @@
 package ro.itschool.Booking.service;
 
-import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.repository.query.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ro.itschool.Booking.DtoEntity.PersonDTO;
+import ro.itschool.Booking.Dto.PersonDTO;
 import ro.itschool.Booking.customException.PersonNotFoundException;
 import ro.itschool.Booking.entity.Person;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.customException.IncorretNameException;
 import ro.itschool.Booking.customException.MobileNumberException;
+import ro.itschool.Booking.entity.Role;
 import ro.itschool.Booking.repository.PersonRepository;
+import ro.itschool.Booking.repository.PropertyRepository;
+import ro.itschool.Booking.specifications.PersonRoleAndFirstNameRequest;
+import ro.itschool.Booking.specifications.QuerySpecificationsDao;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,21 +31,51 @@ import java.util.Optional;
 
 @Service
 public class PersonService {
-    private final PersonRepository personRepository;
+    @Autowired
+    private PersonRepository personRepository;
+    @Autowired
+    private ModelMapper mapper;
 
-    private final ModelMapper mapper;
+    @Autowired
+    private PropertyRepository propertyRepository;
 
-    public PersonService(PersonRepository personRepository, ModelMapper mapper) {
-        this.personRepository = personRepository;
-        this.mapper = mapper;
+    @Autowired
+    private QuerySpecificationsDao querySpecificationsDao;
+
+
+    public PersonService(PersonRepository repository) {
     }
+
 
     //GET
-    public List<Person> getAllPersons() {
-        return personRepository.findAll();
+//---------------------------------------------------------------------------------------------------------------------
+    public List<Person> getAllPersons(Integer pageNo,
+                                      Integer pageSize,
+                                      String sortBy) {
+
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+
+        Page<Person> pagedResult = personRepository.findAll(paging);
+
+        if (pagedResult.hasContent()) {
+            return pagedResult.getContent();
+        } else {
+            return new ArrayList<Person>();
+        }
     }
 
-    public Optional<PersonDTO> getById(Long id) throws IncorrectIdException {
+//\---------------------------------------------------------------------------------------------------------------------
+
+    public Person getByIdPerson(Long id) {
+        if (id == null) {
+            throw new RuntimeException("This id must not be null");
+        }
+        return personRepository.findById(id).orElse(new Person());
+    }
+
+
+    //\---------------------------------------------------------------------------------------------------------------------
+    public Optional<PersonDTO> getByIdPersonDTO(Long id) throws IncorrectIdException {
         Optional<Person> person = personRepository.findById(id);
         PersonDTO personDto = mapper.map(person, PersonDTO.class);
         if (person.isEmpty()) {
@@ -49,6 +85,10 @@ public class PersonService {
         }
     }
 
+
+//---------------------------------------------------------------------------------------------------------------------
+
+
     public Person getPersonOrThrow(Long id) throws PersonNotFoundException {
         Optional<Person> person = personRepository.findById(id);
         return person.orElseThrow(() -> new PersonNotFoundException("this person is not found"));
@@ -56,35 +96,18 @@ public class PersonService {
 
 
     //Post
+//---------------------------------------------------------------------------------------------------------------------
     public Person savePerson(Person person) throws MobileNumberException, IncorretNameException {
         checkEmailExists(person);
         checkToHaveSpecificCharacterInEmail(person);
         checkMobileNumber(person);
+        person.setRole(Role.ROLE_USER);
         return personRepository.save(person);
 
     }
 
-    public Person createOrUpdatePerson(@NotNull Person person_p, @Nullable Long id) throws PersonNotFoundException {
-        Person person;
-        String sMessage = null;
-        //update case
-        if (id != null) {
-            person = getPersonOrThrow(id);
-            sMessage = "Its an error with updating a person";
 
-        } else {
-            person_p.setPersonId(null);
-            sMessage = "Its an error with saving a person";
-        }
-        try {
-
-            person = savePerson(person_p);
-        } catch (Exception e) {
-            throw new RuntimeException(sMessage);
-        }
-        return person;
-    }
-
+    //---------------------------------------------------------------------------------------------------------------------
     private void checkEmailExists(Person person) throws IncorretNameException {
         Optional<Person> checkEmailExists = personRepository.findByEmail(person.getEmail());
         if (checkEmailExists.isPresent()) {
@@ -92,6 +115,8 @@ public class PersonService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     //method to check if mobile number exists
     private void checkMobileNumber(Person person) throws MobileNumberException {
         Optional<Object> savePerson = personRepository.getPersonByMobileNumber(person.getMobileNumber());
@@ -100,6 +125,8 @@ public class PersonService {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------------------------------
     private void checkToHaveSpecificCharacterInEmail(Person person) throws IncorretNameException {
         Optional<Person> checkEmail = personRepository.findByEmail(person.getEmail());
         if (checkEmail.isPresent()) {
@@ -110,6 +137,7 @@ public class PersonService {
     }
 
     //UPDATE
+//---------------------------------------------------------------------------------------------------------------------
     public void updatePerson(Long id, Person person) throws IncorretNameException, MobileNumberException, IncorrectIdException {
         Person updatePerson = personRepository.findById(id).orElseThrow(
                 () -> new IncorrectIdException(String.format("This id %s is not found", person.getPersonId())));
@@ -122,45 +150,46 @@ public class PersonService {
         checkMobileNumber(person);
     }
 
+
     //DELETE
+//---------------------------------------------------------------------------------------------------------------------
+
     public void deletePerson(Long id) throws IncorrectIdException {
         if (id == null) {
             throw new IncorrectIdException("This id " + id
                     + " is not found");
-        } else
-            personRepository.deleteById(id);
+        } else {
+            Person person_p = (personRepository.findById(id).orElseThrow(() -> new IncorrectIdException("There are no person that have this id:" + id)));
+            personRepository.delete(person_p);
+        }
     }
 
+//---------------------------------------------------------------------------------------------------------------------
+
     public Optional<Person> findByEmail(String email) {
-        return personRepository.findByEmail(email);
+        return Optional.ofNullable(personRepository.findByEmail(email).orElse(new Person()));
     }
+
+
+//---------------------------------------------------------------------------------------------------------------------
 
     public Optional<Person> findById(Long id) {
         return personRepository.findById(id);
-    }
-
-    public List<PersonDTO> searchByFirstNameAndOrLastName(@Param("firstName") String firstName,
-                                                          @Param("lastName") String lastName) {
-        List<Person> personList = new ArrayList<>();
-        List<PersonDTO> personDTOList = new ArrayList<>();
-        personList.addAll(personRepository.searchFirstNameOrLastName(firstName, lastName).isEmpty() ? null : personRepository.searchFirstNameOrLastName(firstName, lastName));
-        for (Person person : personList) {
-            PersonDTO personDTO = mapper.map(person, PersonDTO.class);
-            personDTOList.add(personDTO);
-        }
-        return personDTOList;
 
     }
 
+
+    // generate EXCEL
+    //---------------------------------------------------------------------------------------------------------------------
     public void generateExcel(HttpServletResponse httpServletResponse) throws IOException {
         List<Person> personList = personRepository.findAll();
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("List With Persons");
         HSSFRow row = sheet.createRow(0);
         row.createCell(0).setCellValue("ID");
-        row.createCell(0).setCellValue("First Name");
-        row.createCell(0).setCellValue("Last Name");
-        row.createCell(0).setCellValue("Email");
+        row.createCell(1).setCellValue("First Name");
+        row.createCell(2).setCellValue("Last Name");
+        row.createCell(3).setCellValue("Email");
 
         int dataRowIndex = 1;
         for (Person person : personList) {
@@ -174,5 +203,33 @@ public class PersonService {
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
         workbook.write(outputStream);
         outputStream.close();
+
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------
+    public Person updateOrSavePerson(Person personRequest, Long personId) throws MobileNumberException, IncorretNameException {
+        if (personId == null) {
+            return savePerson(personRequest);
+        } else {
+            Person person = findById(personId).get();
+            if (person != null) {
+                mapper.map(personRequest, person);
+            }
+            return savePerson(person);
+        }
+    }
+
+    public List<Person> getPropertyByPersonFirstName(String propertyName) {
+
+        return personRepository.getAllPersonsByPropertiesName(propertyName);
+    }
+
+    public List<Person> getPropertyByNameFilter(String name) {
+        List<Person> personList = personRepository.getPersonsByFirstName(name);
+        return (personList.isEmpty() && personList == null) ? new ArrayList<>() : personList;
+    }
+
+    public List<Person> getPersonNameAndRole(PersonRoleAndFirstNameRequest personRoleAndFirstNameRequest) {
+        return querySpecificationsDao.getAllPersonByFirstNameOrMobileNumber(personRoleAndFirstNameRequest);
     }
 }

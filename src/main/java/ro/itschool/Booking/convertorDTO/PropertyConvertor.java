@@ -1,7 +1,7 @@
 package ro.itschool.Booking.convertorDTO;
 
 import org.springframework.stereotype.Service;
-import ro.itschool.Booking.DtoEntity.PropertyDTO;
+import ro.itschool.Booking.Dto.PropertyDTO;
 import ro.itschool.Booking.entity.Property;
 
 import java.util.List;
@@ -17,6 +17,7 @@ public class PropertyConvertor {
         propertyDTO.setPropertyName(property.getPropertyName());
         propertyDTO.setPropertyAddress(property.getPropertyAddress());
         propertyDTO.setPropertyLocation(property.getPropertyLocation());
+        propertyDTO.setPropertyEmail(property.getPropertyEmail());
 
         return propertyDTO;
 
