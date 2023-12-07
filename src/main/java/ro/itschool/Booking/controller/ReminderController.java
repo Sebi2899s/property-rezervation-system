@@ -8,7 +8,6 @@ import ro.itschool.Booking.entity.Reminder;
 import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.service.ReminderService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,7 +36,7 @@ public class ReminderController {
                                                  @RequestParam(defaultValue = "10") Integer pageSize,
                                                  @RequestParam(defaultValue = "ASC") String sortBy,
                                                  @PathVariable Long reservationId) {
-        return reminderService.findAllByReservation(pageNo, pageSize, sortBy, reservationId);
+        return reminderService.findAllByReservationSpecification(reservationId);
     }
 
     @Transactional

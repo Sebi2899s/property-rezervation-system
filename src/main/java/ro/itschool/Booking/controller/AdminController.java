@@ -13,10 +13,8 @@ import ro.itschool.Booking.Dto.FacilityRq;
 import ro.itschool.Booking.Dto.ReservationRequestDTO;
 import ro.itschool.Booking.customException.*;
 import ro.itschool.Booking.entity.*;
-import ro.itschool.Booking.repository.CouponRepository;
 import ro.itschool.Booking.service.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,7 +124,7 @@ public class AdminController {
                                                  @RequestParam(defaultValue = "10") Integer pageSize,
                                                  @RequestParam(defaultValue = "ASC") String sortBy,
                                                  @PathVariable Long reservationId) {
-        return reminderService.findAllByReservation(pageNo, pageSize, sortBy, reservationId);
+        return reminderService.findAllByReservationSpecification( reservationId);
     }
 
 
