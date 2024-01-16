@@ -80,9 +80,9 @@ public class PersonService {
         PersonDTO personDto = mapper.map(person, PersonDTO.class);
         if (person.isEmpty()) {
             throw new IncorrectIdException("This id " + id + " was not found!");
-        } else {
-            return Optional.ofNullable(personDto);
         }
+        return Optional.ofNullable(personDto);
+
     }
 
 
