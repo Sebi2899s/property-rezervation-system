@@ -3,7 +3,6 @@ package ro.itschool.Booking.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +23,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class AdminController {
+    //pull request
     private final PersonService personService;
     private final PropertyService propertyService;
 
