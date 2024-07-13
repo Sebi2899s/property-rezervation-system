@@ -1,4 +1,4 @@
-package ro.itschool.Booking.exception;
+package ro.itschool.Booking.customException;
 
 public class IncorrectIdException extends Exception {
 

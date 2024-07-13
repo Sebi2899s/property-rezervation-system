@@ -1,7 +1,7 @@
 package ro.itschool.Booking.convertorDTO;
 
 import org.springframework.stereotype.Service;
-import ro.itschool.Booking.DtoEntity.PersonDTO;
+import ro.itschool.Booking.Dto.PersonDTO;
 import ro.itschool.Booking.entity.Person;
 
 import java.util.List;
@@ -13,7 +13,6 @@ public class PersonConvertor {
     public PersonDTO entityToDto(Person person) {
         //convert entity to DTO
         PersonDTO personDTO = new PersonDTO();
-        personDTO.setPersonId(person.getPersonId());
         personDTO.setFirstName(person.getFirstName());
         personDTO.setLastName(person.getLastName());
         personDTO.setEmail(person.getEmail());
@@ -31,7 +30,6 @@ public class PersonConvertor {
     public Person dtoToEntity(PersonDTO personDTO) {
         //convert DTO to entity
         Person person = new Person();
-        person.setPersonId(personDTO.getPersonId());
         person.setFirstName(personDTO.getFirstName());
         person.setLastName(personDTO.getLastName());
         person.setEmail(personDTO.getEmail());
