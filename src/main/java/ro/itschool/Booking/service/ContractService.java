@@ -7,7 +7,6 @@ import ro.itschool.Booking.customException.IncorrectDateException;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.Contact;
 import ro.itschool.Booking.repository.ContactRepository;
-import ro.itschool.Booking.service.email.impl.EmailSenderServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,8 @@ public class ContractService {
 
     @Autowired
     private ContactRepository contactRepository;
-    @Autowired
-    private EmailSenderServiceImpl emailSenderService;
+//    @Autowired
+//    private EmailSenderServiceImpl emailSenderService;
 
     public List<Contact> getAllContacts() {
         List<Contact> allContacts = contactRepository.findAll();
@@ -31,7 +30,6 @@ public class ContractService {
 
     @Transactional
     public Contact createContact(Contact contact) throws IncorrectDateException {
-        sendEmailWithInformationFromContact(contact);
         if (contact == null) {
             throw new IncorrectDateException("This contact should not be null");
         } else {
@@ -39,11 +37,11 @@ public class ContractService {
         }
     }
 
-    private void sendEmailWithInformationFromContact(Contact contact) {
-        if (contact != null) {
-            emailSenderService.sendEmail(contact.getEmail(), contact.getBody(), contact.getSubject());
-        }
-    }
+//    private void sendEmailWithInformationFromContact(Contact contact) {
+//        if (contact != null) {
+//            emailSenderService.sendEmail(contact.getEmail(), contact.getBody(), contact.getSubject());
+//        }
+//    }
 
 
     public Contact updateContact(Long id, Contact contactDetails) throws IncorrectIdException {

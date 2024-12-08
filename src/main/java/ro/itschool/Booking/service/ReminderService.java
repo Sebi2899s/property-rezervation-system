@@ -1,6 +1,5 @@
 package ro.itschool.Booking.service;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import ro.itschool.Booking.customException.IncorrectIdException;
 import ro.itschool.Booking.entity.Reminder;
 import ro.itschool.Booking.entity.Reservation;
-import ro.itschool.Booking.entity.Status;
 import ro.itschool.Booking.repository.ReminderRepository;
 import ro.itschool.Booking.repository.ReservationRepository;
 
@@ -44,9 +42,17 @@ public class ReminderService {
         }
     }
 
+    public List<Reminder> findAllByReservationSpecification(@NotNull Long reservation) {
+        Page<Reminder> pageByReservation = reminderRepository.findAll((Pageable) idEqualToReservationId(reservation));
+        if (pageByReservation.hasContent()) {
+            return pageByReservation.getContent();
+        } else {
+            return new ArrayList<>();
+        }
+    }
     public List<Reminder> findAllByReservation(Integer pageNo, Integer pageSize, String sortBy, @NotNull Long reservation) {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-        Page<Reminder> pageByReservation = reminderRepository.findAll((Pageable) idEqualToReservationId(reservation));
+        Page<Reminder> pageByReservation = reminderRepository.findAll(paging);
         if (pageByReservation.hasContent()) {
             return pageByReservation.getContent();
         } else {

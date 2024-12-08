@@ -79,12 +79,20 @@ public class PropertyService {
 
 
     //---------------------------------------------------------------------------------------------------------------------
+    public List<Property> findAllByPropertyTypeSpecification(String propertyType){
+        if (propertyType == null){
+            return Collections.emptyList();
+        }
+        List<Property> propertyList = (List<Property>) getPropertyByPropertyType(propertyType);
+        return propertyList;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
     //GET by property name
     public List<Property> getByPropertyName(String propertyName) throws IncorretNameException {
         if (propertyName == null) {
             throw new IncorretNameException("There's no property with this name " + propertyName);
-        } else
-            return propertyRepository.findByPropertyName(propertyName);
+        }
+        return propertyRepository.findByPropertyName(propertyName);
     }
 
 
@@ -210,6 +218,10 @@ public class PropertyService {
     //---------------------------------------------------------------------------------------------------------------------
 
     public static Specification<Property> getPropertyByPropertyType(String propertyType) {
+        if (propertyType == null) {
+            // Handle null case, throw an exception, or return a default Specification
+            return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction(); // Example: a default Specification that always evaluates to true
+        }
         Specification<Property> propertySpecification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("propertyType"), propertyType);
         return propertySpecification;
     }
